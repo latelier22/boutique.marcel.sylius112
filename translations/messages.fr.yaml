@@ -1,0 +1,8 @@
+sylius:
+    ui.ean: "Code EAN"
+    ui.code: "Référence"
+
+app:
+    form:
+        product_variant:
+                        flag: "EAN BarCode"

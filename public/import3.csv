@@ -1,0 +1,5 @@
+Code,Locale,Name,Description,Short_description,Meta_description,Meta_keywords,Main_taxon,Taxons,Channels,Enabled,Price
+MUG,fr_FR,Mug,"Mug Blanc personnable à imprimer","Mug blanc",,,MUG,CATEGORIES|CERAMIQUE,default,1,1800
+MUG001,fr_FR,"Mug Noir","Superbe Mug intérieur et anse noir","Superbe Mug intérieur et anse noir",,,,,default,1,2000
+MUG002,fr_FR,"Mug Jaune","Superbe Mug intérieur et anse Jaune","Superbe Mug intérieur et anse Jaune",,,,,default,1,1500
+MUG003,fr_FR,"Mug Rouge","Superbe Mug intérieur et anse Rouge","Superbe Mug intérieur et anse Rouge",,,,,default,1,1750

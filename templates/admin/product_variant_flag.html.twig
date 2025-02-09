@@ -1,0 +1,12 @@
+{% extends '@SyliusAdmin/layout.html.twig' %}
+
+{% block content %}
+    <h1>Produit Trouvé</h1>
+
+    <p><strong>Code :</strong> {{ productVariant.code }}</p>
+    <p><strong>Nom :</strong> {{ productVariant.translations[app.request.locale].name ?? 'Nom non disponible' }}</p>
+    <p><strong>EAN :</strong> {{ productVariant.ean ?? 'Non défini' }}</p>
+    <p><strong>Prix :</strong> {{ productVariant.channelPricings['default'].price / 100 }} €</p>
+
+    <a href="{{ path('sylius_admin_product_variant_index') }}" class="ui button">Retour</a>
+{% endblock %}

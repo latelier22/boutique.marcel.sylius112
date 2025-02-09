@@ -1,3 +1,16 @@
 sylius_paypal_webhook:
     resource: "@SyliusPayPalPlugin/Resources/config/webhook_routing.yaml"
 
+asdoria_bulk_edit:
+    resource: "@AsdoriaSyliusBulkEditPlugin/config/routing.yaml"
+
+
+admin_product_variant_flag:
+    path: api/v2/admin/product-variants/flag
+    controller: App\Controller\Admin\ProductVariantFlagController::flagProductVariant
+    methods: [POST]
+
+admin_image_upload:
+    path: /api/v2/admin/images/upload
+    controller: App\Controller\Admin\ImageUploadController::uploadImage
+    methods: [POST]

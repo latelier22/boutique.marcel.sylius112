@@ -1,0 +1,4 @@
+framework:
+    messenger:
+        buses:
+            asdoria_bulk_edit.bus: ~

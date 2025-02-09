@@ -21,8 +21,12 @@ class TestController
 
         return new JsonResponse([
             'id' => $productVariant->getId(),
+            'name' => $productVariant->getName(),
             'code' => $productVariant->getCode(),
-            'ean' => $productVariant->getEan(),
+            'flag' => $productVariant->getFlag(),
+            'Stock' => $productVariant->getOnHand(),
+            // 'price' => $productVariant->getPrice()
+
         ]);
     }
 }

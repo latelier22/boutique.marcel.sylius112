@@ -10,6 +10,11 @@ framework:
     serializer:
         mapping:
             paths: [ '%kernel.project_dir%/config/serialization' ]
+    http_method_override: true
+    request:
+        formats:
+            json: ['application/json']
+            multipart: ['multipart/form-data']
 
 when@dev:
     framework:

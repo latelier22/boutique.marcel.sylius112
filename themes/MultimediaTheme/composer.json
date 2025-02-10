@@ -1,5 +1,5 @@
 {
-    "name": "latelier22/marcel",
+    "name": "latelier22/multimedia-theme",
     "authors": [
         {
             "name": "Cyrille LE CORRE",
@@ -8,7 +8,7 @@
     ],
     "extra": {
         "sylius-theme": {
-            "title": "Marcel Séjour"
+            "title": "Multimedia Theme"
         }
     }
 }

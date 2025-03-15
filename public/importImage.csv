@@ -1,0 +1,11 @@
+Code,Locale,Name,Description,Short_description,Meta_description,Meta_keywords,Main_taxon,Taxons,Channels,Enabled,Price,Images_PERSO,Images_TAB
+CAR15x15,fr_FR,Mug céramique blanc,,,,,CERAMIQUE,,default|BOUTIQUE,1,1800,,
+MUG,fr_FR,Mug,Mug Blanc personnable à imprimer,Mug blanc,,,MUG,CATEGORIES|CERAMIQUE|MUG,default,1,1800,,
+MUG001,fr_FR,Mug Noir,Superbe Mug intérieur et anse noir,Superbe Mug intérieur et anse noir,,,,,default,1,2000,,
+MUG002,fr_FR,Mug Jaune,Superbe Mug intérieur et anse Jaune,Superbe Mug intérieur et anse Jaune,,,,,default,1,1500,,
+MUG003,fr_FR,Mug Rouge,Superbe Mug intérieur et anse Rouge,Superbe Mug intérieur et anse Rouge,,,,,default,1,1750,,
+PERSOMUG,fr_FR,Message personaliser mug,,,,,TAB,TAB,default,1,0,5a/2b/8ffc32a58ccc12e5b21801e61f95.png,
+TAB001CO,fr_FR,Seule à la lessive,,,,,TAB,TAB,default,1,0,,43/6b/d9ae4055259e13671b21eb0caefd.jpg
+TAB001NB,fr_FR,Lessive à la rivière,,,,,TAB,TAB,default,1,0,,12/d7/360b8d98b12e4647dd2a31b3bc47.jpg
+TAB002NB,fr_FR,Salouvas,,,,,TAB,TAB,default,1,0,4d/55/0a7f563ed51079854b99f0249eb9.jpg,
+TAB003NB,fr_FR,Sourrire,,,,,TAB,TAB,default,1,0,test_import.jpg,

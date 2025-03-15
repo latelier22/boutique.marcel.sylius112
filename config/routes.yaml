@@ -15,6 +15,11 @@ admin_image_upload:
     controller: App\Controller\Admin\ImageUploadController::uploadImage
     methods: [POST]
 
+api_shop_upload_image:
+    path: /api/v2/shop/upload-image
+    controller: App\Controller\Shop\ImageUploadController::uploadImage
+    methods: [POST]
+
 # config/routes.yaml
 odiseo_sylius_banner_plugin_admin:
     resource: "@OdiseoSyliusBannerPlugin/Resources/config/routing/admin.yaml"
@@ -25,3 +30,10 @@ odiseo_sylius_banner_plugin_shop:
     prefix: /{_locale}/banners
     requirements:
         _locale: ^[A-Za-z]{2,4}(_([A-Za-z]{4}|[0-9]{3}))?(_([A-Za-z]{2}|[0-9]{3}))?$
+
+
+product_images_by_category:
+    path: /product/images/by-category/{taxonCode}
+    controller: App\Controller\ProductController::showProductImagesByTaxonCode
+    requirements:
+        taxonCode: '[a-zA-Z0-9\-]+'  # Optionnel : tu peux définir un pattern pour categorySlug

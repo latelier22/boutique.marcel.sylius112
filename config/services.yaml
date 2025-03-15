@@ -28,8 +28,12 @@ services:
     App\Controller\:
         resource: '../src/Controller'
         tags: ['controller.service_arguments']
-        
-# define a service which will be used as the queue
+    
+    App\Controller\ProductController:
+        tags: ['controller.service_arguments']
+
+
+    # define a service which will be used as the queue
     redis_connection_factory:
         class: Enqueue\Redis\RedisConnectionFactory
 
@@ -37,3 +41,10 @@ services:
         class: App\Form\Extension\ProductVariantTypeMyExtension
         tags:
             - { name: form.type_extension, extended_type: Sylius\Bundle\ProductBundle\Form\Type\ProductVariantType, priority: -5 }
+
+
+
+
+
+
+

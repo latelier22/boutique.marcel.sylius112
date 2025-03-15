@@ -5,19 +5,19 @@ const syliusBundles = path.resolve(__dirname, 'vendor/sylius/sylius/src/Sylius/B
 const uiBundleScripts = path.resolve(syliusBundles, 'UiBundle/Resources/private/js/');
 const uiBundleResources = path.resolve(syliusBundles, 'UiBundle/Resources/private/');
 
-// webpack.config.js
-const [bitbagproductBundleShop, bitbagproductBundleAdmin] = require('./vendor/bitbag/product-bundle-plugin/webpack.config.js');
-
 // Shop config
 Encore
   .setOutputPath('public/build/shop/')
   .setPublicPath('/build/shop')
   .addEntry('shop-entry', './vendor/sylius/sylius/src/Sylius/Bundle/ShopBundle/Resources/private/entry.js')
+  .addEntry('react-entry', './assets/app.js')
+  .addEntry('comment-entry','./assets/js/entry.js')
   .disableSingleRuntimeChunk()
   .cleanupOutputBeforeBuild()
   .enableSourceMaps(!Encore.isProduction())
   .enableVersioning(Encore.isProduction())
-  .enableSassLoader();
+  .enableSassLoader()
+  .enableReactPreset();
 
 const shopConfig = Encore.getWebpackConfig();
 
@@ -27,6 +27,27 @@ shopConfig.resolve.alias['sylius/bundle'] = syliusBundles;
 shopConfig.name = 'shop';
 
 Encore.reset();
+
+// // Shop config
+// Encore
+//   .setOutputPath('public/build/shop')
+//   .setPublicPath('/build/shop')
+//   .addEntry('react-entry', './assets/app.js')
+//   .disableSingleRuntimeChunk()
+//   .cleanupOutputBeforeBuild()
+//   .enableSourceMaps(!Encore.isProduction())
+//   .enableVersioning(Encore.isProduction())
+//   .enableSassLoader()
+//   .enableReactPreset();
+
+// const reactConfig = Encore.getWebpackConfig();
+
+// reactConfig.name = 'react';
+
+// Encore.reset();
+
+
+
 
 // Admin config
 Encore
@@ -58,7 +79,9 @@ Encore
     .cleanupOutputBeforeBuild()
     .enableSourceMaps(!Encore.isProduction())
     .enableVersioning(Encore.isProduction())
-    .enableSassLoader();
+    .enableSassLoader()
+    .enableReactPreset();
+    
 
 const appShopConfig = Encore.getWebpackConfig();
 
@@ -89,4 +112,4 @@ appAdminConfig.resolve.alias['sylius/bundle'] = syliusBundles;
 appAdminConfig.externals = Object.assign({}, appAdminConfig.externals, { window: 'window', document: 'document' });
 appAdminConfig.name = 'app.admin';
 
-module.exports = [shopConfig, adminConfig, appShopConfig, appAdminConfig, bitbagproductBundleShop, bitbagproductBundleAdmin];
+module.exports = [shopConfig, adminConfig, appShopConfig, appAdminConfig];

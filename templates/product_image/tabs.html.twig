@@ -1,0 +1,49 @@
+{# templates/product_image/tabs.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Product Tab Images{% endblock %}
+
+{% block body %}
+    <h1>Product Tab Images</h1>
+
+    <!-- Création des onglets -->
+    <div class="tabs">
+        <ul class="tab-titles">
+            {% for image in tabImages %}
+                <li>
+                    <a href="#tab{{ loop.index }}">{{ image.altText ?: 'Image ' ~ loop.index }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <div class="tab-content">
+            {% for image in tabImages %}
+                <div id="tab{{ loop.index }}" class="tab-pane">
+                    <img src="{{ asset(image.path) }}" alt="{{ image.altText ?: 'Product Image ' ~ loop.index }}">
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <style>
+        .tabs { display: flex; flex-direction: column; }
+        .tab-titles { list-style-type: none; padding: 0; display: flex; }
+        .tab-titles li { margin-right: 10px; }
+        .tab-titles a { cursor: pointer; }
+        .tab-content { margin-top: 20px; }
+        .tab-pane { display: none; }
+        .tab-pane:first-child { display: block; }
+    </style>
+
+    <script>
+        // JavaScript pour basculer entre les onglets
+        document.querySelectorAll('.tab-titles a').forEach((tab, index) => {
+            tab.addEventListener('click', (event) => {
+                event.preventDefault();
+
+                document.querySelectorAll('.tab-pane').forEach(pane => pane.style.display = 'none');
+                document.querySelector(`#tab${index + 1}`).style.display = 'block';
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,7 @@
+# # repositories.yml
+# services:
+#     App\Repository\ProductImageRepository:
+#         class: App\Repository\ProductImageRepository
+#         factory: ['@doctrine.orm.entity_manager', 'getRepository']
+#         arguments:
+#             - App\Entity\ProductImage  # Le nom de votre entité ProductImage

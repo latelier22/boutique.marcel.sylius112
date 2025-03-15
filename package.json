@@ -8,6 +8,20 @@
     "watch": "encore dev --watch"
   },
   "devDependencies": {
-    "@sylius-ui/frontend": "^1.0"
+    "@babel/preset-react": "^7.26.3",
+    "@hotwired/stimulus": "^3.0.0",
+    "@sylius-ui/frontend": "^1.0",
+    "@symfony/stimulus-bridge": "^3.2.0",
+    "@symfony/ux-react": "file:vendor/symfony/ux-react/assets",
+    "react": "^18.0",
+    "react-dom": "^18.0"
+  },
+  "dependencies": {
+    "@react-three/drei": "^9.121.4",
+    "@react-three/fiber": "^8.17.14",
+    "fabric": "^5.3",
+    "fabricjs-react": "^2.1.0",
+    "react-icons": "^5.4.0",
+    "three": "^0.173.0"
   }
 }

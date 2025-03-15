@@ -1,0 +1,22 @@
+<!-- templates/shop/index.html.twig -->
+
+
+
+{% block body %}
+    <h1>Welcome to the shop!</h1>
+    <!-- React component will be mounted here -->
+
+    <post-comments data-post="{{maData}}" ></post-comments>
+
+    {# <div {{ react_component('Hello', { fullName: fullName }) }}>
+        Loading... <i class="fas fa-cog fa-spin fa-3x"></i>
+    </div> #}
+
+
+
+{% endblock %}
+
+
+{% block javascripts %}
+    {{ encore_entry_script_tags('comment-entry', null, 'shop') }}
+{% endblock %}

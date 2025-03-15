@@ -1,0 +1,24 @@
+{# templates/product/images_by_category.html.twig #}
+{# {% extends 'base.html.twig' %} #}
+
+{% block title %}Product Images by Category{% endblock %}
+
+{% block body %}
+    <h1>Products in Category: "{{ taxonCode }}"</h1>
+
+    <div class="products">
+        {% for product in products %}
+            <div class="product">
+                <h2>{{ product.product_image }}</h2>
+                <img src="/media/image/{{product.product_image}}" alt="" />
+                {# <div class="product-images">
+                    {% for image in product.images %}
+                        <img src="{{ asset(image.path) }}" alt="{{ image.altText }}">
+                    {% endfor %}
+                </div> #}
+            </div>
+        {% else %}
+            <p>No products found for this category.</p>
+        {% endfor %}
+    </div>
+{% endblock %}

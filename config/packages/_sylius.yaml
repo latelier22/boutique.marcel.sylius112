@@ -11,6 +11,8 @@ imports:
     - { resource: "@AsdoriaSyliusBulkEditPlugin/config/config.yaml"}
 
     - { resource: "@OdiseoSyliusBannerPlugin/Resources/config/config.yaml" }
+    
+    - { resource: '../repositories.yaml' }
 
 parameters:
     sylius_core.public_dir: '%kernel.project_dir%/public'
@@ -139,6 +141,7 @@ sylius_product:
         product:
             classes:
                 model: App\Entity\Product\Product
+                repository: App\Repository\ProductRepository
             translation:
                 classes:
                     model: App\Entity\Product\ProductTranslation

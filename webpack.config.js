@@ -6,12 +6,13 @@ const uiBundleScripts = path.resolve(syliusBundles, 'UiBundle/Resources/private/
 const uiBundleResources = path.resolve(syliusBundles, 'UiBundle/Resources/private/');
 
 // webpack.config.js
-const [bitbagproductBundleShop, bitbagproductBundleAdmin] = require('./vendor/bitbag/product-bundle-plugin/webpack.config.js');
+// const [bitbagproductBundleShop, bitbagproductBundleAdmin] = require('./vendor/bitbag/product-bundle-plugin/webpack.config.js');
 
 // Shop config
 Encore
   .setOutputPath('public/build/shop/')
   .setPublicPath('/build/shop')
+  .addEntry('theme', './themes/MarcelTheme/public/scss/main.scss')
   .addEntry('shop-entry', './vendor/sylius/sylius/src/Sylius/Bundle/ShopBundle/Resources/private/entry.js')
   .disableSingleRuntimeChunk()
   .cleanupOutputBeforeBuild()
@@ -89,4 +90,4 @@ appAdminConfig.resolve.alias['sylius/bundle'] = syliusBundles;
 appAdminConfig.externals = Object.assign({}, appAdminConfig.externals, { window: 'window', document: 'document' });
 appAdminConfig.name = 'app.admin';
 
-module.exports = [shopConfig, adminConfig, appShopConfig, appAdminConfig, bitbagproductBundleShop, bitbagproductBundleAdmin];
+module.exports = [shopConfig, adminConfig, appShopConfig, appAdminConfig];

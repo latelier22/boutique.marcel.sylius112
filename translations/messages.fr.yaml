@@ -5,4 +5,7 @@ sylius:
 app:
     form:
         product_variant:
-                        flag: "EAN BarCode"
+                        flag: "EAN BarCode22"
+                        ean: "ean"
+                        isTableau: "Tableau (oui/non)"
+                        isPrivate: "Collection privée (oui/non)"

@@ -1,19 +1,85 @@
 imports:
     - { resource: "@SyliusCoreBundle/Resources/config/app/config.yml" }
-
     - { resource: "@SyliusAdminBundle/Resources/config/app/config.yml" }
     - { resource: "@SyliusApiBundle/Resources/config/app/config.yaml" }
-
-    - { resource: "@SyliusShopBundle/Resources/config/app/config.yml" }
     - { resource: "@SyliusPayPalPlugin/Resources/config/config.yaml" }
     - { resource: "../parameters.yaml" }
-    
-    - { resource: "@AsdoriaSyliusBulkEditPlugin/config/config.yaml"}
-
+    - { resource: "@AsdoriaSyliusBulkEditPlugin/config/config.yaml" }
     - { resource: "@OdiseoSyliusBannerPlugin/Resources/config/config.yaml" }
+    - { resource: "@SyliusUiBundle/Resources/config/app/config.yml" }
+
+    - { resource: "@SyliusShopBundle/Resources/config/app/sylius/sylius_mailer.yml" }
+    - { resource: "@SyliusShopBundle/Resources/config/grids/account/order.yml" }
+    - { resource: "@SyliusShopBundle/Resources/config/grids/product.yml" }
+
+
 
 parameters:
+    sylius.security.shop_regex: "^/(?!%sylius_admin.path_name%|api/.*|api$|media/.*)[^/]++"
     sylius_core.public_dir: '%kernel.project_dir%/public'
+
+webpack_encore:
+    builds:
+        shop: '%kernel.project_dir%/public/build/shop'
+
+sylius_grid:
+    templates:
+        action:
+            pay: "@SyliusShop/Account/Order/Grid/Action/_pay_deprecated.html.twig"
+            shop_show: "@SyliusShop/Grid/Action/show.html.twig"
+            shop_pay: "@SyliusShop/Account/Order/Grid/Action/pay.html.twig"
+        filter:
+            shop_string: "@SyliusShop/Grid/Filter/string.html.twig"
+    grids:
+        sylius_admin_product_review:
+            fields:
+                title:
+                    enabled: true
+        sylius_admin_product_variant:
+            fields:
+                ean:
+                    enabled: false
+
+
+sylius_shop:    
+    checkout_resolver:
+        pattern: "%sylius.security.shop_regex%/checkout/.+"
+        route_map:
+            empty_order:
+                route: sylius_shop_cart_summary
+            cart:
+                route: sylius_shop_checkout_address
+            addressed:
+                route: sylius_shop_checkout_select_shipping
+            shipping_selected:
+                route: sylius_shop_checkout_select_payment
+            shipping_skipped:
+                route: sylius_shop_checkout_select_payment
+            payment_selected:
+                route: sylius_shop_checkout_complete
+            payment_skipped:
+                route: sylius_shop_checkout_complete
+    product_grid:
+        include_all_descendants: true
+
+liip_imagine:
+    filter_sets:
+        sylius_shop_product_original: ~
+        sylius_shop_product_tiny_thumbnail:
+            filters:
+                thumbnail: { size: [64, 64], mode: outbound }
+        sylius_shop_product_small_thumbnail:
+            filters:
+                thumbnail: { size: [150, 112], mode: outbound }
+        sylius_shop_product_thumbnail:
+            filters:
+                thumbnail: { size: [260, 260], mode: outbound }
+        sylius_shop_product_large_thumbnail:
+            filters:
+                thumbnail: { size: [550, 412], mode: outbound }
+
+sonata_block:
+    default_contexts: ~
 
 when@dev:
     sylius_api:
@@ -139,9 +205,12 @@ sylius_product:
         product:
             classes:
                 model: App\Entity\Product\Product
+                controller: App\Controller\ProductController
+                repository: App\Repository\ProductRepository
             translation:
                 classes:
                     model: App\Entity\Product\ProductTranslation
+             
         product_variant:
             classes:
                 model: App\Entity\Product\ProductVariant
@@ -170,6 +239,9 @@ sylius_product:
             translation:
                 classes:
                     model: App\Entity\Product\ProductAssociationTypeTranslation
+        
+                   
+
 
 sylius_promotion:
     resources:
@@ -249,9 +321,7 @@ sylius_user:
                 classes:
                     model: App\Entity\User\UserOAuth
 
-sylius_shop:
-    product_grid:
-        include_all_descendants: true
+
 
 sylius_theme:
     sources:
@@ -267,13 +337,5 @@ sylius_invoicing:
 
 
 # config/packages/_sylius.yaml
-sylius_grid:
-    grids:
-        sylius_admin_product_review:
-            fields:
-                title:
-                    enabled: true
-        sylius_admin_product_variant:
-            fields:
-                ean:
-                    enabled: false
+
+

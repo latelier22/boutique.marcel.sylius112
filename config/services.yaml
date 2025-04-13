@@ -33,7 +33,13 @@ services:
     redis_connection_factory:
         class: Enqueue\Redis\RedisConnectionFactory
 
-    app.form.extension.type.product_variant:
-        class: App\Form\Extension\ProductVariantTypeMyExtension
-        tags:
-            - { name: form.type_extension, extended_type: Sylius\Bundle\ProductBundle\Form\Type\ProductVariantType, priority: -5 }
+    # app.form.extension.type.product_variant:
+    #     class: App\Form\Extension\ProductVariantTypeMyExtension
+    #     tags:
+    #         - { name: form.type_extension, extended_type: Sylius\Bundle\ProductBundle\Form\Type\ProductVariantType, priority: -5 }
+
+    App\Twig\ProductVariantExtension:
+        autowire: true
+        autoconfigure: true
+        arguments:
+            $variantRepository: '@sylius.repository.product_variant'

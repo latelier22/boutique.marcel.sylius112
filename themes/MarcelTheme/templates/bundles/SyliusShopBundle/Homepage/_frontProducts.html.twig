@@ -1,0 +1,6 @@
+{% set products = front_products() %}
+
+<h2 class="ui center aligned huge header">{{ 'sylius.ui.front'|trans }}</h2>
+<div class="ui hidden divider"></div>
+
+{% include '@SyliusShop/Homepage/_list.html.twig' %}

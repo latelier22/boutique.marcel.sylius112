@@ -20,4 +20,21 @@ class Product extends BaseProduct
     {
         return new ProductTranslation();
     }
+
+
+    /**
+ * @ORM\Column(name="is_perso", type="boolean", nullable=false, options={"default" : false})
+ */
+private bool $isPerso = false;
+
+public function isPerso(): bool
+{
+    return $this->isPerso;
+}
+
+public function setPerso(bool $isPerso): void
+{
+    $this->isPerso = $isPerso;
+}
+
 }

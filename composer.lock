@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3ecf05958e4277bf099ddb109bc7f45d",
+    "content-hash": "2213f5057b227babfdd82fcf40a97a1b",
     "packages": [
         {
             "name": "alcohol/iso4217",
@@ -5323,6 +5323,67 @@
                 }
             ],
             "time": "2024-12-05T17:15:07+00:00"
+        },
+        {
+            "name": "monsieurbiz/sylius-media-manager-plugin",
+            "version": "v1.2.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/monsieurbiz/SyliusMediaManagerPlugin.git",
+                "reference": "3e2934917cb8be2fbc3d40ce9f8505d59ddef8ef"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/monsieurbiz/SyliusMediaManagerPlugin/zipball/3e2934917cb8be2fbc3d40ce9f8505d59ddef8ef",
+                "reference": "3e2934917cb8be2fbc3d40ce9f8505d59ddef8ef",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.1",
+                "sylius/sylius": ">=1.12 <2.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.16",
+                "phpmd/phpmd": "^2.15",
+                "phpspec/phpspec": "^7.0",
+                "phpstan/phpstan": "^1.8.4",
+                "phpstan/phpstan-doctrine": "^1.3.2",
+                "phpstan/phpstan-webmozart-assert": "^1.1",
+                "phpunit/phpunit": "^10.5"
+            },
+            "type": "sylius-plugin",
+            "extra": {
+                "symfony": {
+                    "docker": false,
+                    "endpoint": [
+                        "https://api.github.com/repos/monsieurbiz/symfony-recipes/contents/index.json?ref=flex/master",
+                        "flex://defaults"
+                    ]
+                },
+                "branch-alias": {
+                    "dev-master": "1.1-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "MonsieurBiz\\SyliusMediaManagerPlugin\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Add a media manager to your Sylius.",
+            "keywords": [
+                "monsieurbiz",
+                "sylius",
+                "sylius-plugin"
+            ],
+            "support": {
+                "issues": "https://github.com/monsieurbiz/SyliusMediaManagerPlugin/issues",
+                "source": "https://github.com/monsieurbiz/SyliusMediaManagerPlugin/tree/v1.2.3"
+            },
+            "time": "2025-02-25T14:57:42+00:00"
         },
         {
             "name": "myclabs/php-enum",
@@ -12780,6 +12841,76 @@
                 }
             ],
             "time": "2025-01-28T14:53:52+00:00"
+        },
+        {
+            "name": "symfony/sendgrid-mailer",
+            "version": "v6.4.18",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/sendgrid-mailer.git",
+                "reference": "18dca2e8fc8e449e2dacdd40a9bbd544b3a10e90"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/sendgrid-mailer/zipball/18dca2e8fc8e449e2dacdd40a9bbd544b3a10e90",
+                "reference": "18dca2e8fc8e449e2dacdd40a9bbd544b3a10e90",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.1",
+                "symfony/mailer": "^5.4.21|^6.2.7|^7.0"
+            },
+            "conflict": {
+                "symfony/http-foundation": "<6.2",
+                "symfony/mime": "<6.2"
+            },
+            "require-dev": {
+                "symfony/http-client": "^5.4|^6.0|^7.0",
+                "symfony/webhook": "^6.3|^7.0"
+            },
+            "type": "symfony-mailer-bridge",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Mailer\\Bridge\\Sendgrid\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony Sendgrid Mailer Bridge",
+            "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/sendgrid-mailer/tree/v6.4.18"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2025-01-07T11:11:15+00:00"
         },
         {
             "name": "symfony/serializer",

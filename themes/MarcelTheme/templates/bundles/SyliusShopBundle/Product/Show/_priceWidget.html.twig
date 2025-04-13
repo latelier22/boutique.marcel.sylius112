@@ -1,0 +1,32 @@
+{% set variant = product|sylius_resolve_variant %}
+
+{% if variant is not null %}
+    {% set appliedPromotions = variant.getChannelPricingForChannel(sylius.channel).getAppliedPromotions() %}
+    {% include '@SyliusShop/Product/Show/_catalogPromotionLabels.html.twig' with {'appliedPromotions': appliedPromotions, 'withDescription': true} %}
+{% endif %}
+
+<div class="ui stackable grid" {{ sylius_test_html_attribute('product-price-content') }}>
+    <div class="seven wide column">
+        {% if not product.enabledVariants.empty() %}
+            {% if variant.isPrivate is not same as(true) %}
+                {# Si la variante n'est pas privée, afficher le prix #}
+                {% include '@SyliusShop/Product/Show/_price.html.twig' %}
+            {% else %}
+                {# Si la variante est privée, ne rien afficher #}
+                <p class="ui red header">Collection privée. Vous pouvez commander une reproduction, où un produit dérivé</p>
+            {% endif %}
+        {% endif %}
+    </div>
+    <div class="nine wide right aligned column">
+        <span class="ui sub header">{{ product.code }}</span>
+        <br/>  
+   
+    {% if variant.isTableau is same as(true) %}
+        <span class="ui sub header">TABLEAU ORIGINAL</span> 
+        <br/>
+    {% endif %}
+    {% if variant.isPrivate is same as(true) %}
+        <span class="ui sub header">Collection privée</span> 
+    {% endif %}
+     </div>
+</div>

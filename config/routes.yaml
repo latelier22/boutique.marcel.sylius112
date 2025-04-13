@@ -25,3 +25,20 @@ odiseo_sylius_banner_plugin_shop:
     prefix: /{_locale}/banners
     requirements:
         _locale: ^[A-Za-z]{2,4}(_([A-Za-z]{4}|[0-9]{3}))?(_([A-Za-z]{2}|[0-9]{3}))?$
+
+
+app_product_personalized:
+    path: /{_locale}/products/{slug}/{code}
+    controller: sylius.controller.product::personalizedShowAction
+    defaults:
+        _sylius:
+            section: shop
+            template: "@SyliusShop/Product/personalized/show.html.twig"
+            repository:
+                method: findBySlug
+                arguments:
+                    - "expr:service('request_stack').getCurrentRequest().attributes.get('slug')"
+                    - "%locale%"
+
+shop_taxon_mis_en_avant:
+    path: /{_locale}/taxons/mis-en-avant

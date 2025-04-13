@@ -11,8 +11,6 @@
 <tr>
     <td class="single line">
         {% include '@SyliusAdmin/Product/_info.html.twig' %}
-
-        {{ bitbag_render_product_bundle_order_items(item) }}
     </td>
     <td class="right aligned unit-price">
         {{ money.format(item.unitPrice, order.currencyCode) }}

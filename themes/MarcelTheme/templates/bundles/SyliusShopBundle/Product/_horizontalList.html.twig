@@ -1,0 +1,17 @@
+{% set currentTableauCode = currentTableauCode|default(null) %}
+
+
+<div class="ui four doubling cards">
+{% for product in products %}
+    {% include '@SyliusShop/Product/Box/_content.html.twig' with {
+        'product': product,
+        'currentTableauCode': currentTableauCode
+    } %}
+{% endfor %}
+</div>
+{# 
+<div class="ui four doubling cards">
+    {% for product in products %}
+        {% include '@SyliusShop/Product/_box.html.twig' %}
+    {% endfor %}
+</div> #}

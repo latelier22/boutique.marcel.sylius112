@@ -1,0 +1,74 @@
+
+
+<div id="frame-editor-container">
+    <h2>🎨 Personnaliser votre cadre</h2>
+
+    <div id="frame-controls">
+        <div style="margin-bottom: 1.5rem;">
+            <strong>🎨 Couleur du cadre :</strong><br />
+            {% set couleurs = {
+                'noir': '#000000',
+                'blanc': '#FFFFFF',
+                'bordeaux': '#800020',
+                'rouge': '#FF0000',
+                'orange': '#FFA500',
+                'vert kaki': '#708238',
+                'bleu marine': '#003366',
+                'bleu ciel': '#87CEEB',
+                'brun foncé': '#654321',
+                'jaune': '#FFD700'
+            } %}
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; justify-content: center;">
+                {% for nom, code in couleurs %}
+                    <label title="{{ nom }}" class="color-circle" style="background-color: {{ code }};">
+                        <input type="radio" name="frameColorRadio" value="{{ code }}" style="display: none;">
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <strong>📏 Largeur du cadre :</strong><br />
+            <input type="range" id="frameWidthSlider" min="0" max="50" value="15" />
+            <span id="frameWidthValue">15</span> px
+            <br /><br />
+            <label>
+                🎛️ Palette :
+                <input type="color" id="frameColorPicker" value="#000000" />
+            </label>
+            <br /><br />
+            <button id="activateFrameEyedropper" type="button">🎯 Pipette</button>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <strong>🖼️ Couleur du passe-partout :</strong><br />
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; justify-content: center;">
+                {% for nom, code in couleurs %}
+                    <label title="{{ nom }}" class="color-circle" style="background-color: {{ code }};">
+                        <input type="radio" name="passepartoutColorRadio" value="{{ code }}" style="display: none;">
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <strong>📏 Largeur du passe-partout :</strong><br />
+            <input type="range" id="ppWidthSlider" min="0" max="50" value="0" />
+            <span id="ppWidthValue">0</span> px
+            <br /><br />
+            <label>
+                🎛️ Palette :
+                <input type="color" id="ppColorPicker" value="#FFFFFF" />
+            </label>
+            <br /><br />
+            <button id="activatePPEyedropper" type="button">🎯 Pipette</button>
+        </div>
+
+        <div style="margin-top: 1rem; display: flex; justify-content: center; gap: 1rem;">
+            <button id="clearFrame" type="button">❌ Supprimer</button>
+            <button id="saveFrame" type="button">💾 Enregistrer</button>
+        </div>
+    </div>
+</div>
+
+<button id="simulateFrame" type="button" style="width: 100%; margin-top: 1rem; padding: 1rem; font-size: 1.2rem;">🎨 Simuler un encadrement</button>

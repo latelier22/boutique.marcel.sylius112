@@ -1,0 +1,143 @@
+{# templates/bundles/SyliusShopBundle/Product/personalized/show.html.twig #}
+{% extends '@SyliusShop/layout.html.twig' %}
+
+{% block title %}{{ product.name }} | {{ parent() }}{% endblock %}
+
+{% block content %}
+    {% include '@SyliusShop/Product/Show/_breadcrumb.html.twig' %}
+    <div class="ui hidden divider"></div>
+
+    <div class="ui two column stackable grid">
+        <div class="column">
+            {{ sylius_template_event('sylius.shop.product.show.left_sidebar', _context) }}
+        </div>
+
+        <div class="column" {{ sylius_test_html_attribute('product-box') }}>
+            {{ sylius_template_event('sylius.shop.product.show.right_sidebar', _context) }}
+
+            {% if productAssocie is defined and productAssocie is not null %}
+                <div class="ui segment">
+                    <h3 class="ui header">🎨 Tableau associé</h3>
+
+                    {% if productAssocie.imagesByType('main') is not empty %}
+                        {% set source_path = productAssocie.imagesByType('main').first.path %}
+                        {% set original_path = source_path|imagine_filter('sylius_shop_product_original') %}
+                        {% set path = original_path %}
+                    {% elseif productAssocie.images.first %}
+                        {% set source_path = productAssocie.images.first.path %}
+                        {% set original_path = source_path|imagine_filter('sylius_shop_product_original') %}
+                        {% set path = original_path %}
+                    {% else %}
+                        {% set original_path = asset('assets/shop/img/400x300.png') %}
+                        {% set path = original_path %}
+                    {% endif %}
+
+                    <a href="{{ original_path }}" class="ui fluid image" data-lightbox="sylius-product-image">
+                        <img src="{{ path }}" id="associated-image" alt="{{ productAssocie.name }}" />
+                    </a>
+
+                    {% if productAssocie.images|length > 1 %}
+                        <div class="ui divider"></div>
+                        <div class="ui small images">
+                            {% for image in productAssocie.images %}
+                                {% set thumb_path = image.path is not null
+                                    ? image.path|imagine_filter('sylius_shop_product_small_thumbnail')
+                                    : asset('assets/shop/img/200x200.png') %}
+                                <div class="ui image">
+                                    <a href="{{ image.path|imagine_filter('sylius_shop_product_original') }}" data-lightbox="sylius-product-image">
+                                        <img
+                                            src="{{ thumb_path }}"
+                                            data-large-thumbnail="{{ image.path|imagine_filter('sylius_shop_product_large_thumbnail') }}"
+                                            data-full="{{ image.path|imagine_filter('sylius_shop_product_original') }}"
+                                            alt="{{ productAssocie.name }}"
+                                            class="tableau-thumbnail"
+                                        />
+                                    </a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="ui segment">
+                    <div class="ui placeholder">
+                        <p style="font-size: 1.2em; padding: 1em 0;">
+                            Cliquez sur un des tableaux ci-dessous pour personnaliser votre produit.
+                        </p>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if isCarreau and isPerso %}
+                {% include '@SyliusShop/Product/Show/Perso/_carreau_editor_canvas.html.twig' %}
+            {% endif %}
+        </div>
+    </div>
+
+    {% if productsAvecTableaux is not empty %}
+        <div class="ui segment">
+            <h3 class="ui header">🖼️ Tableaux disponibles</h3>
+            <div class="ui small images">
+                {% for p in productsAvecTableaux %}
+                    {% set image = p.images.first %}
+                    {% set tableauVariant = p.variants|filter(v => v.isTableau)|first %}
+                    {% if image and tableauVariant %}
+                        <a href="{{ path('app_product_personalized', {
+                            'slug': productSlug,
+                            'code': tableauVariant.code,
+                            '_locale': app.request.locale
+                        }) }}"
+                        class="tableau-thumbnail"
+                        data-full="{{ image.path|imagine_filter('sylius_shop_product_original') }}">
+                            <img
+                                src="{{ image.path | imagine_filter('sylius_shop_product_small_thumbnail') }}"
+                                alt="{{ p.name }}"
+                                class="ui image"
+                            />
+                        </a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    {{ sylius_template_event('sylius.shop.product.show.content', _context) }}
+{% endblock %}
+
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const thumbnails = document.querySelectorAll('.tableau-thumbnail');
+
+            thumbnails.forEach(thumbnail => {
+                const bigPreview = document.createElement('img');
+                bigPreview.src = thumbnail.dataset.full;
+                bigPreview.classList.add('ui', 'image');
+                bigPreview.style.position = 'absolute';
+                bigPreview.style.zIndex = '1000';
+                bigPreview.style.display = 'none';
+                bigPreview.style.maxWidth = '500px';
+                bigPreview.style.border = '1px solid #ccc';
+                bigPreview.style.background = 'white';
+                document.body.appendChild(bigPreview);
+
+                thumbnail.addEventListener('mouseover', e => {
+                    bigPreview.style.left = (e.pageX + 10) + 'px';
+                    bigPreview.style.top = (e.pageY - 10) + 'px';
+                    bigPreview.style.display = 'block';
+                });
+
+                thumbnail.addEventListener('mousemove', e => {
+                    bigPreview.style.left = (e.pageX + 10) + 'px';
+                    bigPreview.style.top = (e.pageY - 10) + 'px';
+                });
+
+                thumbnail.addEventListener('mouseleave', () => {
+                    bigPreview.style.display = 'none';
+                });
+            });
+        });
+    </script>
+{% endblock %}

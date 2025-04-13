@@ -329,6 +329,19 @@
     "monolog/monolog": {
         "version": "1.23.0"
     },
+    "monsieurbiz/sylius-media-manager-plugin": {
+        "version": "1.2",
+        "recipe": {
+            "repo": "github.com/monsieurbiz/symfony-recipes",
+            "branch": "master",
+            "version": "1.0",
+            "ref": "be326a8cd381bf47d4102257a96d66ff38a7fa47"
+        },
+        "files": [
+            "config/packages/monsieurbiz_media_manager_plugin.yaml",
+            "config/routes/monsieurbiz_media_manager_plugin.yaml"
+        ]
+    },
     "myclabs/deep-copy": {
         "version": "1.8.1"
     },
@@ -865,6 +878,15 @@
     },
     "symfony/security-http": {
         "version": "v4.4.18"
+    },
+    "symfony/sendgrid-mailer": {
+        "version": "6.4",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "4.4",
+            "ref": "224aedffb66812dc2b0965dabc14d5f800941da6"
+        }
     },
     "symfony/serializer": {
         "version": "v5.1.2"

@@ -1,9 +1,9 @@
-{% if products|length == 4 %}
-    {% set columns = "two" %}
+{% if products|length >= 4 %}
+    {% set columns = "four odd doubling" %}
 {% endif %}
-{% if products|length == 3 %}
+{# {% if products|length == 3 %}
     {% set columns = "three odd doubling" %}
-{% endif %}
+{% endif %} #}
 
 <div class="ui {{ columns|default('') }} cards">
     {% for product in products %}

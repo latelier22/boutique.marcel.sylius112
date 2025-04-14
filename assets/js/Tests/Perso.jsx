@@ -9,24 +9,27 @@ import { createRoot } from 'react-dom/client';
 import React from 'react';
 import Scene from './Scene';
 
-const Test = ({name}) => {
+
+const Perso = ({name}) => {
   
 
-  return (<>
-    <div>
-      HELLO2 {name}
-    </div>
-    <Scene />
-  </>
+  return (
+    <>
+      <div>
+        HELLO {name}
+      </div>
+      {/* <Cube /> */}
+      <Scene />
+    </>
   );
 };
 
-class CustomTestElement extends HTMLElement {
+class CustomPersoElement extends HTMLElement {
   connectedCallback() {
     const name = this.getAttribute('name'); // ← récupère l'attribut HTML
     const root = createRoot(this);
-    root.render(<Test name={name} />); // ← passe la prop à React
+    root.render(<Perso name={name} />); // ← passe la prop à React
   }
 }
 
-customElements.define('test-component', CustomTestElement);
+customElements.define('perso-component', CustomPersoElement);

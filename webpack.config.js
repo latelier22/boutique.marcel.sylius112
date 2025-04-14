@@ -13,12 +13,15 @@ Encore
   .setOutputPath('public/build/shop/')
   .setPublicPath('/build/shop')
   .addEntry('theme', './themes/MarcelTheme/public/scss/main.scss')
+  .addEntry('theme-perso', './themes/MarcelTheme/public/scss/perso.scss')
   .addEntry('shop-entry', './vendor/sylius/sylius/src/Sylius/Bundle/ShopBundle/Resources/private/entry.js')
+  .addEntry('comment-entry','./assets/js/entry.js')
   .disableSingleRuntimeChunk()
   .cleanupOutputBeforeBuild()
   .enableSourceMaps(!Encore.isProduction())
   .enableVersioning(Encore.isProduction())
-  .enableSassLoader();
+  .enableSassLoader()
+  .enableReactPreset();
 
 const shopConfig = Encore.getWebpackConfig();
 

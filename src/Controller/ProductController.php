@@ -13,7 +13,23 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class ProductController extends ResourceController
+
 {
+
+    function hasTaxonCode($product, string $expectedCode): bool {
+        foreach ($product->getProductTaxons() as $productTaxon) {
+            $taxon = $productTaxon->getTaxon();
+            while ($taxon !== null) {
+                if ($taxon->getCode() === $expectedCode) {
+                    return true;
+                }
+                $taxon = $taxon->getParent();
+            }
+        }
+        return false;
+    }
+    
+
     public function personalizedShowAction(
         string $slug,
         string $code,
@@ -49,9 +65,13 @@ class ProductController extends ResourceController
         //     throw $this->createNotFoundException('Produit (variant) non trouvé.');
         // }
 
+        // foreach ($product->getProductTaxons() as $pt) {
+        //     dump($pt->getTaxon()->getCode());
+        // }
+        // dump($this->hasTaxonCode($product, 'PERSO_MUG'));
         
         $productsAvecTableaux = $productRepository->findAllWithIsTableauVariant();
-
+       
 
         // dd('Produit par slug:', $product, 'Produit associé du variant:', $productAssocie);
         // dd( 'Produit associé du variant:', $productAssocie);
@@ -65,7 +85,12 @@ class ProductController extends ResourceController
             'resource' => $product,
             'configuration' => $configuration,
             'metadata' => $this->metadata,
-            'productSlug' => $slug
+            'productSlug' => $slug,
+            'isPersoMug' => $this->hasTaxonCode($product, 'PERSO_MUG'),
+            'isCarreau' => $product->getProductTaxons()->exists(function ($key, $pt) {
+        return $pt->getTaxon() && $pt->getTaxon()->getCode() === 'PERSO_CARREAU';
+    }),
+    'isPerso' => $product->isPerso(),
         ]);
         
     }
@@ -104,7 +129,11 @@ class ProductController extends ResourceController
                 'resource' => $product,
                 'configuration' => $configuration,
                 'metadata' => $this->metadata,
-                'productSlug' => $slug,
+                'isPersoMug' => $this->hasTaxonCode($product, 'PERSO_MUG'),
+                'isCarreau' => $product->getProductTaxons()->exists(function ($key, $pt) {
+        return $pt->getTaxon() && $pt->getTaxon()->getCode() === 'PERSO_CARREAU';
+    }),
+    'isPerso' => $product->isPerso(),
             ]);
         }
     

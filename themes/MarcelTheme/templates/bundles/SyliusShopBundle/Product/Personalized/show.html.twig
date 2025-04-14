@@ -8,7 +8,18 @@
     <div class="ui hidden divider"></div>
 
     <div class="ui two column stackable grid">
-        <div class="column">
+        <div class="column" id="canvas-wrapper-col">
+
+        {# REACT #}
+
+
+    {% if isPersoMug %}
+        <test-component name="Mug Pers: {{ isPersoMug }}">Chargement du composant test...</test-component>
+    {% endif %}
+    
+
+
+
             {{ sylius_template_event('sylius.shop.product.show.left_sidebar', _context) }}
         </div>
 
@@ -17,7 +28,9 @@
 
             {% if productAssocie is defined and productAssocie is not null %}
                 <div class="ui segment">
-                    <h3 class="ui header">🎨 Tableau associé</h3>
+                    <h3 class="ui header">Visuel personnalisé</h3>
+                    <div id="screenshot-gallery" style="display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;"></div>
+                    <h3 class="ui header">Tableau associé</h3>
 
                     {% if productAssocie.imagesByType('main') is not empty %}
                         {% set source_path = productAssocie.imagesByType('main').first.path %}
@@ -31,6 +44,7 @@
                         {% set original_path = asset('assets/shop/img/400x300.png') %}
                         {% set path = original_path %}
                     {% endif %}
+                    
 
                     <a href="{{ original_path }}" class="ui fluid image" data-lightbox="sylius-product-image">
                         <img src="{{ path }}" id="associated-image" alt="{{ productAssocie.name }}" />

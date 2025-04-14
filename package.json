@@ -8,6 +8,16 @@
     "watch": "encore dev --watch"
   },
   "devDependencies": {
-    "@sylius-ui/frontend": "^1.0"
+    "@babel/preset-react": "^7.26.3",
+    "react": "^18.0",
+    "react-dom": "^18.0"
+  },
+  "dependencies": {
+    "@react-three/drei": "^10.0.6",
+    "@react-three/fiber": "^9.1.2",
+    "fabric": "^5.5.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "three": "^0.173.0"
   }
 }

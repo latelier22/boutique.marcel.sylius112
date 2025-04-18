@@ -1,4 +1,19 @@
+# framework:
+#     messenger:
+#         buses:
+#             asdoria_bulk_edit.bus: ~
+
 framework:
     messenger:
+        default_bus: messenger.bus.default
+
+        transports:
+            main:
+                dsn: 'doctrine://default'
+
+        routing:
+            App\Message\DescribeProductMessage: main
+
         buses:
+            messenger.bus.default: ~
             asdoria_bulk_edit.bus: ~

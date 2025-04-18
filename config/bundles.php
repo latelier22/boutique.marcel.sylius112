@@ -75,4 +75,5 @@ return [
     Vich\UploaderBundle\VichUploaderBundle::class => ['all' => true],
     Odiseo\SyliusBannerPlugin\OdiseoSyliusBannerPlugin::class => ['all' => true],
     MonsieurBiz\SyliusMediaManagerPlugin\MonsieurBizSyliusMediaManagerPlugin::class => ['all' => true],
+    
 ];

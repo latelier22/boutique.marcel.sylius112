@@ -42,3 +42,42 @@ app_product_personalized:
 
 shop_taxon_mis_en_avant:
     path: /{_locale}/taxons/mis-en-avant
+
+app_shop_media:
+  path: /api/v2/shop/media
+  controller: App\Controller\Shop\MediaController::upload
+  methods: [POST]
+
+# api_shop_upload_image:
+#     path: /api/v2/shop/upload-image
+#     controller: App\Controller\Shop\ImageUploadController::uploadImage
+#     methods: [POST]
+
+api_shop_upload_image:
+  path: /api/v2/shop/upload-image
+  controller: App\Controller\Shop\UploadImageController::upload
+  methods: [POST]
+
+
+app_admin_update_tableaux_tags:
+    path: /admin/update-tableaux-tags/{code}
+    controller: App\Controller\Admin\UpdateTableauxTagsController::index
+    methods: [GET]
+
+#    Route("/admin/update-all-tableaux-tags", name="admin_update_all_tableaux_tags")
+
+app_admin_update_all_tableaux_tags:
+    path: /admin/update-all-tableaux-tags
+    controller: App\Controller\Admin\UpdateAllTableauxTagsController::updateAll
+
+
+app_admin_import_tableaux:
+    path: /admin/tableaux/import/{de}/{a}
+    controller: App\Controller\Admin\ImportTableauxController::import
+    methods: [GET]
+
+
+api_shop_generate_description:
+    path: /api/v2/shop/generate-description
+    controller: App\ApiController\Shop\ApiDescriptionGenerationController::generate
+    methods: [POST]

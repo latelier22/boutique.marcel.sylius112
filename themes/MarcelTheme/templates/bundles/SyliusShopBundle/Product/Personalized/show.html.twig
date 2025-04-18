@@ -88,7 +88,28 @@
         </div>
     </div>
 
-    {% if productsAvecTableaux is not empty %}
+
+{# <div id="react-gallery" data-props="{{ {
+    ,
+   
+}|json_encode|e('html_attr') }}"></div> #}
+{# 
+<div id="react-gallery">
+<gallery-component
+    title="Tableaux disponibles"
+    tableaux="{{ tableauxAvecTaxons|json_encode|e('html_attr') }}"
+    taxonsTableaux="{{ taxonsTableaux|json_encode|e('html_attr') }}"
+>
+    Chargement Gallery de Tableaux
+</gallery-component> #}
+
+
+  <test-gallery 
+    name="Gallery" 
+    tableaux="{{ tableauxAvecTaxons|json_encode|e('html_attr') }}"
+    >Chargement du composant testGallery..</test-gallery>
+
+    {# {% if productsAvecTableaux is not empty %}
         <div class="ui segment">
             <h3 class="ui header">🖼️ Tableaux disponibles</h3>
             <div class="ui small images">
@@ -102,7 +123,7 @@
                             '_locale': app.request.locale
                         }) }}"
                         class="tableau-thumbnail"
-                        data-full="{{ image.path|imagine_filter('sylius_shop_product_original') }}">
+                        data-full="{{ image.path|imagine_filter('sylius_shop_product_scaled') }}">
                             <img
                                 src="{{ image.path | imagine_filter('sylius_shop_product_small_thumbnail') }}"
                                 alt="{{ p.name }}"
@@ -113,7 +134,7 @@
                 {% endfor %}
             </div>
         </div>
-    {% endif %}
+    {% endif %} #}
 
     {{ sylius_template_event('sylius.shop.product.show.content', _context) }}
 {% endblock %}

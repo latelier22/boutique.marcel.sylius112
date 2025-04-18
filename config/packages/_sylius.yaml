@@ -12,6 +12,10 @@ imports:
     - { resource: "@SyliusShopBundle/Resources/config/grids/account/order.yml" }
     - { resource: "@SyliusShopBundle/Resources/config/grids/product.yml" }
 
+    # - { resource: "@BitBagSyliusElasticsearchPlugin/Resources/config/config.yml" }
+
+    # - { resource: "@BitBagSyliusElasticsearchPlugin/config/config.yml" }
+
 
 
 parameters:
@@ -77,6 +81,9 @@ liip_imagine:
         sylius_shop_product_large_thumbnail:
             filters:
                 thumbnail: { size: [550, 412], mode: outbound }
+        sylius_shop_product_scaled:
+            filters:
+                thumbnail: { size: [400, 400], mode: outbound }
 
 sonata_block:
     default_contexts: ~
@@ -303,9 +310,11 @@ sylius_taxonomy:
         taxon:
             classes:
                 model: App\Entity\Taxonomy\Taxon
+                repository: App\Repository\TaxonRepository
             translation:
                 classes:
                     model: App\Entity\Taxonomy\TaxonTranslation
+
 sylius_user:
     resources:
         admin:

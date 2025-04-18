@@ -43,3 +43,6 @@ services:
         autoconfigure: true
         arguments:
             $variantRepository: '@sylius.repository.product_variant'
+
+    App\Twig\AppExtension:
+        tags: [ 'twig.extension' ]

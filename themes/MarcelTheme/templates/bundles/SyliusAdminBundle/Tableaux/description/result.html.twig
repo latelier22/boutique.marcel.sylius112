@@ -1,0 +1,46 @@
+{% extends '@SyliusAdmin/layout.html.twig' %}
+
+{% block content %}
+    <div class="ui segment">
+        <h2 class="ui header">Résumé de la génération</h2>
+
+        <div class="ui grid">
+            <div class="eight wide column">
+                <img src="{{ image_url }}" alt="Aperçu de l'œuvre" class="ui large bordered image" />
+            </div>
+
+            <div class="eight wide column">
+                <h3 class="ui header">Titre produit</h3>
+                <p><strong>{{ product.translations.first.name }}</strong></p>
+
+                <h3 class="ui header">Description courte</h3>
+                <p>{{ short_description }}</p>
+
+                <h3 class="ui header">Mots-clés SEO</h3>
+                <div class="ui labels">
+                    {% for keyword in seo_keywords %}
+                        <span class="ui label">{{ keyword }}</span>
+                    {% endfor %}
+                </div>
+
+               
+                    <h3 class="ui header">Couleurs principales</h3>
+                    <ul>
+                       <div class="ui labels">
+                    {% for color in colors %}
+                        <span class="ui label">{{ color }}</span>
+                    {% endfor %}
+                </div>
+                    </ul>
+                
+            </div>
+        </div>
+
+        <h3 class="ui dividing header">Description longue</h3>
+        <p>{{ description|raw }}</p>
+
+        <a href="{{ path('sylius_admin_product_update', {'id': product.id}) }}" class="ui primary button">
+            Modifier le produit
+        </a>
+    </div>
+{% endblock %}

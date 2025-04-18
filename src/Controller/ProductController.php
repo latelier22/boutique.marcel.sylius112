@@ -71,16 +71,29 @@ class ProductController extends ResourceController
         // dump($this->hasTaxonCode($product, 'PERSO_MUG'));
         
         $productsAvecTableaux = $productRepository->findAllWithIsTableauVariant();
+
+        // dd($productsAvecTableaux);
        
+        $taxonsTableaux = [];
 
-        // dd('Produit par slug:', $product, 'Produit associé du variant:', $productAssocie);
-        // dd( 'Produit associé du variant:', $productAssocie);
-        // dd( 'Produits tableaux:', $productsAvecTableaux);
-
+        foreach ($productsAvecTableaux as $tableau) {
+            foreach ($tableau->getProductTaxons() as $pt) {
+                $taxon = $pt->getTaxon();
+                if ($taxon && $taxon->getParent() && $taxon->getParent()->getCode() === 'TAB') {
+                    $taxonsTableaux[$taxon->getCode()] = [
+                        'code' => $taxon->getCode(),
+                        'name' => $taxon->getName()
+                    ];
+                }
+            }
+        }
+        
+        // dd($taxonsTableaux);
+      
         return $this->render('@SyliusShop/Product/Personalized/show.html.twig', [
-            'product' => $product,               // celui du slug
+            'product' => $product,
             'variant' => $variant,
-            'productAssocie' => $productAssocie, // celui du code
+            'productAssocie' => $productAssocie,
             'productsAvecTableaux' => $productsAvecTableaux,
             'resource' => $product,
             'configuration' => $configuration,
@@ -88,10 +101,13 @@ class ProductController extends ResourceController
             'productSlug' => $slug,
             'isPersoMug' => $this->hasTaxonCode($product, 'PERSO_MUG'),
             'isCarreau' => $product->getProductTaxons()->exists(function ($key, $pt) {
-        return $pt->getTaxon() && $pt->getTaxon()->getCode() === 'PERSO_CARREAU';
-    }),
-    'isPerso' => $product->isPerso(),
+                return $pt->getTaxon() && $pt->getTaxon()->getCode() === 'PERSO_CARREAU';
+            }),
+            'isPerso' => $product->isPerso(),
+            'tableauxAvecTaxons' => $productsAvecTableaux,
+            'taxonsTableaux' => array_values($taxonsTableaux),
         ]);
+        
         
     }
 

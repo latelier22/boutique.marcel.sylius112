@@ -1,0 +1,207 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const canvasEl = document.getElementById('carreauCanvas');
+    const wrapper = document.getElementById('carreau-wrapper');
+    const canvasWidth = wrapper.clientWidth;
+    const canvasHeight = canvasWidth; // carré
+    const canvas = new fabric.Canvas('carreauCanvas');
+    canvas.setWidth(canvasWidth);
+    canvas.setHeight(canvasHeight);
+
+    let clipZone;
+    let clipPoints = [];
+    let calibrationMode = false;
+
+    const associatedDiv = document.getElementById('associated-image');
+    if (associatedDiv) {
+        associatedDiv.style.display = 'none';
+    }
+    const mainImageDiv = document.getElementById('main-image');
+    if (mainImageDiv) {
+        mainImageDiv.style.display = 'none';
+    }
+
+    // Fond carreau
+    fabric.Image.fromURL('{{ path }}', function (img) {
+        const scale = Math.min(canvasWidth / img.width, canvasHeight / img.height);
+        img.set({
+            scaleX: scale,
+            scaleY: scale,
+            selectable: false,
+            evented: false
+        });
+        const scaledWidth = img.width * scale;
+        const offsetX = (canvasWidth - scaledWidth) / 2;
+
+        img.set({
+            left: offsetX,
+            top: 0,
+            originX: 'left',
+            originY: 'top'
+        });
+
+        canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
+        canvas.setBackgroundColor('white'); //set canvas background color
+
+        createClipZone(offsetX);
+    });
+
+    function createClipZone( offsetX = 0, offsetY = 0) {
+        clipZone && canvas.remove(clipZone);
+        clipPoints.forEach(p => canvas.remove(p));
+
+        // Points de calibration (en pourcentage)
+      clipPoints = [
+        new fabric.Circle({ radius: 6, fill: 'red', left: offsetX + canvasWidth * 0.0648 - 6, top: canvasHeight * 0.1821 - 6, hasControls: false, visible: false }),
+        new fabric.Circle({ radius: 6, fill: 'red', left: offsetX + canvasWidth * 0.7015 - 6, top: canvasHeight * 0.1852 - 6, hasControls: false, visible: false }),
+        new fabric.Circle({ radius: 6, fill: 'red', left: offsetX + canvasWidth * 0.6726 - 6, top: canvasHeight * 0.8076 - 6, hasControls: false, visible: false }),
+        new fabric.Circle({ radius: 6, fill: 'red', left: offsetX + canvasWidth * 0.0754 - 6, top: canvasHeight * 0.7893 - 6, hasControls: false, visible: false })
+    ];
+
+        clipZone = new fabric.Polygon(clipPoints.map(p => ({ x: p.left + 6, y: p.top + 6 })), {
+            fill: 'white',
+            absolutePositioned: true
+        });
+
+        {# canvas.add(clipZone); #}
+{# canvas.sendToBack(clipZone); #}
+
+        
+        clipPoints.forEach(p => {
+            canvas.add(p);
+            p.on('moving', () => {
+                updateClipZone();
+            });
+        });
+    }
+
+    function updateClipZone() {
+        clipZone.set({
+            points: clipPoints.map(p => ({ x: p.left + 6, y: p.top + 6 }))
+        });
+        canvas.requestRenderAll();
+        console.log('Clip points (%):', JSON.stringify(clipPoints.map(p => ({
+            x: ((p.left + 6) / canvasWidth).toFixed(4),
+            y: ((p.top + 6) / canvasHeight).toFixed(4)
+        })), null, 2));
+    }
+
+    createClipZone();
+
+
+// Fonction pour centrer et adapter une image dans la zone de clip
+function placeImageInClip(img) {
+    const clipBounds = clipZone.getBoundingRect();
+    const clipWidth = clipBounds.width;
+    const clipHeight = clipBounds.height;
+
+    const scaleX = clipWidth / img.width;
+    const scaleY = clipHeight / img.height;
+    const scale = (img.width > img.height) ? scaleY : scaleX;
+
+    img.set({
+    scaleX: scale,
+    scaleY: scale,
+    left: clipBounds.left + (clipWidth - img.width * scale) / 2,
+    top: clipBounds.top + (clipHeight - img.height * scale) / 2,
+    lockUniScaling: true, // Tu peux garder ça si tu veux un redimensionnement proportionnel
+    hasRotatingPoint: false,
+    cornerStyle: 'circle',
+    transparentCorners: false,
+    clipPath: clipZone,
+    selectable: true, // <-- IMPORTANT
+    evented: true     // <-- IMPORTANT
+    // PAS de lockMovement, lockScaling ou lockRotation
+});
+
+    canvas.add(img);
+    canvas.setActiveObject(img);
+    canvas.renderAll();
+}
+
+
+
+    // Image associée par ID
+    const associated = document.getElementById('associated-image');
+if (associated) {
+    const imgSrc = associated.getAttribute('data-image-src') || associated.getAttribute('src');
+    if (imgSrc) {
+        fabric.Image.fromURL(imgSrc, function (img) {
+            placeImageInClip(img);
+        });
+    }
+}
+
+    // Upload image utilisateur
+  document.getElementById('imageUploader').addEventListener('change', function (e) {
+    const reader = new FileReader();
+    reader.onload = function (event) {
+        fabric.Image.fromURL(event.target.result, function (img) {
+            placeImageInClip(img);
+        });
+    };
+    reader.readAsDataURL(e.target.files[0]);
+});
+
+
+
+
+document.getElementById('saveCustomTile').addEventListener('click', () => {
+    canvas.discardActiveObject();
+    canvas.renderAll();
+
+    const dataURL = canvas.toDataURL({
+        format: 'png',
+        quality: 1.0
+    });
+
+    // ➕ Remplace l'image affichée
+    const associated = document.getElementById('associated-image');
+    if (associated) {
+        associated.setAttribute('src', dataURL);
+        associated.style.display = 'block';
+
+        const parent = associated.closest('.ui.image, .ui.segment, .column');
+        if (parent) {
+            parent.style.display = 'block';
+        }
+
+        associated.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // 💾 Téléchargement automatique
+    const link = document.createElement('a');
+    link.href = dataURL;
+    link.download = 'carreau-personnalise.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+});
+
+
+
+    // Calibration button
+    const calibrateBtn = document.getElementById('calibrateButton');
+    if (calibrateBtn) {
+        calibrateBtn.addEventListener('click', () => {
+            calibrationMode = !calibrationMode;
+            clipPoints.forEach(p => {
+    p.set({ visible: calibrationMode, selectable: calibrationMode, evented: calibrationMode });
+});
+clipZone.set({ selectable: false, evented: false }); // toujours non sélectionnable
+canvas.discardActiveObject();
+canvas.renderAll();
+
+        });
+    }
+
+    window.addEventListener('resize', () => {
+        const newWidth = wrapper.clientWidth;
+        const newHeight = newWidth;
+        canvas.setWidth(newWidth);
+        canvas.setHeight(newHeight);
+        canvas.renderAll();
+    });
+});
+</script>

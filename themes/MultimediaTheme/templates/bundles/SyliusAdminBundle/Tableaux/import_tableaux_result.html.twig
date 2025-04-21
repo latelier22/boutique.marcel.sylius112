@@ -1,0 +1,31 @@
+{% extends '@SyliusAdmin/layout.html.twig' %}
+
+{% block content %}
+    <div class="ui icon message">
+        <i class="check icon"></i>
+        <div class="content">
+            <div class="header">
+                Importation terminée
+            </div>
+            <p>{{ message }}</p>
+        </div>
+    </div>
+
+    <h2 class="ui header">Liste des tableaux importés</h2>
+    <table class="ui celled table">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Nom</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+                <tr>
+                    <td>{{ product.code }}</td>
+                    <td>{{ product.name }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

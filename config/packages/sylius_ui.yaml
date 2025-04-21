@@ -33,6 +33,9 @@ sylius_ui:
                 front_products:
                     template: "@SyliusShop/Homepage/_frontProducts.html.twig"
                     priority: 55
+                mis_en_avant_products:
+                    template: "@SyliusShop/Homepage/_mis-en-avant_Products.html.twig"
+                    priority: 60
                 # banner:
                 #     template: "@SyliusShop/Homepage/_banner.html.twig"
                 #     priority: 60

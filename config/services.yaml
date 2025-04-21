@@ -46,3 +46,12 @@ services:
 
     App\Twig\AppExtension:
         tags: [ 'twig.extension' ]
+    
+    App\Service\ProductAssociationFilterService:
+        public: true
+
+
+
+imports:
+    - { resource: "../themes/MarcelTheme/config/sylius_ui.yaml" }
+    - { resource: "../themes/MultimediaTheme/config/sylius_ui.yaml" }

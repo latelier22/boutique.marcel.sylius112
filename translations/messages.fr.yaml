@@ -1,6 +1,10 @@
 sylius:
-    ui.ean: "Code EAN"
-    ui.code: "Référence"
+    ui:
+        ean: "Code EAN"
+        code: "Référence"
+        no_featured_products: Aucun produit mis en avant
+        please_check_back_later: Revenez plus tard pour découvrir nos sélections !
+
 
 app:
     form:

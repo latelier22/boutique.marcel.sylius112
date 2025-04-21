@@ -1,12 +1,11 @@
 <?php
 
-// src/Repository/ProductRepository.php
 namespace App\Repository;
 
 use Sylius\Bundle\CoreBundle\Doctrine\ORM\ProductRepository as BaseProductRepository;
 use Sylius\Component\Core\Model\ProductInterface;
 use Sylius\Component\Taxonomy\Model\TaxonInterface;
-
+use Sylius\Component\Channel\Model\ChannelInterface;
 
 class ProductRepository extends BaseProductRepository implements ProductRepositoryInterface
 {
@@ -21,48 +20,81 @@ class ProductRepository extends BaseProductRepository implements ProductReposito
             ->getOneOrNullResult();
     }
 
-    public function findAllWithIsTableauVariant(): array
-{
-    return $this->createQueryBuilder('p')
-        ->addSelect('v')
-        ->leftJoin('p.variants', 'v')
-        ->leftJoin('p.translations', 't')
-        ->leftJoin('p.images', 'images')
-        ->andWhere('v.isTableau = true')
-        ->andWhere('p.enabled = true')
-        ->getQuery()
-        ->getResult();
-}
+    public function findAllWithIsTableauVariant(ChannelInterface $channel): array
+    {
+        return $this->createQueryBuilder('p')
+            ->addSelect('v', 'cp')
+            ->join('p.variants', 'v')
+            ->join('v.channelPricings', 'cp')
+            ->leftJoin('p.translations', 't')
+            ->leftJoin('p.images', 'images')
+            ->andWhere('v.isTableau = true')
+            ->andWhere('p.enabled = true')
+            ->andWhere('v.enabled = true')
+            ->andWhere('cp.channelCode = :channelCode')
+            ->setParameter('channelCode', $channel->getCode())
+            ->getQuery()
+            ->getResult();
+    }
 
-// src/Repository/ProductRepository.php
+    public function findAllTableauxWithTaxons(ChannelInterface $channel): array
+    {
+        return $this->createQueryBuilder('p')
+            ->join('p.variants', 'v')
+            ->join('v.channelPricings', 'cp')
+            ->leftJoin('p.productTaxons', 'pt')
+            ->leftJoin('pt.taxon', 't')
+            ->addSelect('v', 'cp', 'pt', 't')
+            ->where('v.isTableau = true')
+            ->andWhere('p.enabled = true')
+            ->andWhere('v.enabled = true')
+            ->andWhere('cp.channelCode = :channelCode')
+            ->setParameter('channelCode', $channel->getCode())
+            ->getQuery()
+            ->getResult();
+    }
 
-public function findAllTableauxWithTaxons(): array
-{
-    $qb = $this->createQueryBuilder('p')
-        ->join('p.variants', 'v')
-        ->leftJoin('p.productTaxons', 'pt')
-        ->leftJoin('pt.taxon', 't')
-        ->addSelect('v', 'pt', 't')
-        ->where('v.isTableau = true')
-        ->andWhere('p.enabled = true');
+    public function findByTaxonForChannel(TaxonInterface $taxon, ChannelInterface $channel): array
+    {
+        return $this->createQueryBuilder('p')
+            ->join('p.productTaxons', 'pt')
+            ->join('pt.taxon', 't')
+            ->join('p.variants', 'v')
+            ->join('v.channelPricings', 'cp')
+            ->andWhere('t = :taxon')
+            ->andWhere('v.isTableau = true')
+            ->andWhere('p.enabled = true')
+            ->andWhere('v.enabled = true')
+            ->andWhere('cp.channelCode = :channelCode')
+            ->setParameter('taxon', $taxon)
+            ->setParameter('channelCode', $channel->getCode())
+            ->addSelect('v', 'cp', 'pt', 't')
+            ->getQuery()
+            ->getResult();
+    }
 
-    return $qb->getQuery()->getResult();
-}
-
-public function findByTaxon(TaxonInterface $taxon): array
+    public function findByTaxonSlug(string $slug, string $locale, ChannelInterface $channel): array
 {
     return $this->createQueryBuilder('p')
         ->join('p.productTaxons', 'pt')
         ->join('pt.taxon', 't')
+        ->join('t.translations', 'tt')
+        ->join('p.channels', 'c') // ✅ Ici on filtre bien les produits par canal
         ->join('p.variants', 'v')
-        ->andWhere('t = :taxon')
-        ->andWhere('v.isTableau = true')
+        ->join('v.channelPricings', 'cp')
+        ->andWhere('tt.slug = :slug')
+        ->andWhere('tt.locale = :locale')
         ->andWhere('p.enabled = true')
-        ->setParameter('taxon', $taxon)
-        ->addSelect('v', 'pt', 't')
+        ->andWhere('v.enabled = true')
+        ->andWhere('cp.channelCode = :channelCode')
+        ->andWhere('c.code = :channelCode')
+        ->setParameter('slug', $slug)
+        ->setParameter('locale', $locale)
+        ->setParameter('channelCode', $channel->getCode())
+        ->addSelect('v', 'cp', 'pt', 't')
+        ->orderBy('pt.position', 'ASC')
         ->getQuery()
         ->getResult();
 }
-
-
+    
 }

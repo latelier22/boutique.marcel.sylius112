@@ -1,0 +1,36 @@
+{# templates/admin/update_tableaux_tags.html.twig #}
+{% extends '@SyliusAdmin/layout.html.twig' %}
+
+{% block content %}
+    <h1>Tableau {{ code }} (ID: {{ id }})</h1>
+
+    {% if photo.url %}
+        <div>
+            <img src="{{ get_image_url(photo.url) }}" alt="{{ photo.title }}" style="max-width: 400px;">
+        </div>
+    {% endif %}
+
+    <h2>Tags associés</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Slug</th>
+                <th>Main Tag</th>
+                <th>Parent ID</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tag in photo.tags %}
+                <tr>
+                    <td>{{ tag.id }}</td>
+                    <td>{{ tag.name }}</td>
+                    <td>{{ tag.slug }}</td>
+                    <td>{{ tag.mainTag ? 'Oui' : 'Non' }}</td>
+                    <td>{{ tag.parentId is not null ? tag.parentId : '—' }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

@@ -11,10 +11,16 @@ use Sylius\Bundle\ResourceBundle\Controller\ResourceController;
 use Sylius\Component\Resource\ResourceActions;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Sylius\Component\Channel\Context\ChannelContextInterface;
+use Sylius\Component\Core\Model\ProductInterface;
+use App\Service\ProductAssociationFilterService;
+
+
 
 class ProductController extends ResourceController
 
 {
+   
 
     function hasTaxonCode($product, string $expectedCode): bool {
         foreach ($product->getProductTaxons() as $productTaxon) {
@@ -28,6 +34,11 @@ class ProductController extends ResourceController
         }
         return false;
     }
+
+
+    
+    
+
     
 
     public function personalizedShowAction(
@@ -35,7 +46,8 @@ class ProductController extends ResourceController
         string $code,
         Request $request,
         ProductRepository $productRepository,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        ChannelContextInterface $channelContext
     ): Response {
         $configuration = $this->requestConfigurationFactory->create($this->metadata, $request);
         $this->isGrantedOr403($configuration, ResourceActions::SHOW);
@@ -69,9 +81,14 @@ class ProductController extends ResourceController
         //     dump($pt->getTaxon()->getCode());
         // }
         // dump($this->hasTaxonCode($product, 'PERSO_MUG'));
-        
-        $productsAvecTableaux = $productRepository->findAllWithIsTableauVariant();
+        $channel = $channelContext->getChannel();
+        $filterService = $this->get(ProductAssociationFilterService::class);
+        $filterService->filterAssociationsByChannel($product, $channel);
 
+
+        $productsAvecTableaux = $productRepository->findAllWithIsTableauVariant($channel);
+
+        
         // dd($productsAvecTableaux);
        
         $taxonsTableaux = [];
@@ -87,6 +104,9 @@ class ProductController extends ResourceController
                 }
             }
         }
+
+        $currentTableauCode = $variant->getCode() ?? null;
+
         
         // dd($taxonsTableaux);
       
@@ -106,25 +126,33 @@ class ProductController extends ResourceController
             'isPerso' => $product->isPerso(),
             'tableauxAvecTaxons' => $productsAvecTableaux,
             'taxonsTableaux' => array_values($taxonsTableaux),
+            'currentTableauCode' => $currentTableauCode,
         ]);
         
         
     }
 
     public function showAction(Request $request): Response
-    {
-        $configuration = $this->requestConfigurationFactory->create($this->metadata, $request);
-        $this->isGrantedOr403($configuration, ResourceActions::SHOW);
-    
-        /** @var \App\Entity\Product\Product $product */
-        $product = $this->findOr404($configuration);
-        $this->eventDispatcher->dispatch(ResourceActions::SHOW, $configuration, $product);
+{
+    $configuration = $this->requestConfigurationFactory->create($this->metadata, $request);
+    $this->isGrantedOr403($configuration, ResourceActions::SHOW);
+
+    /** @var \App\Entity\Product\Product $product */
+    $product = $this->findOr404($configuration);
+    $this->eventDispatcher->dispatch(ResourceActions::SHOW, $configuration, $product);
+
+    $channel = $this->get('sylius.context.channel')->getChannel();
+    $filterService = $this->get(ProductAssociationFilterService::class);
+    $filterService->filterAssociationsByChannel($product, $channel);
     
         // ✅ Si c’est un produit perso et qu’on n’a pas de code de tableau dans l’URL → REDIRIGER
         if ($product->isPerso()) {
             // Vérifie si le code est déjà présent dans l’URL
             $currentUrl = $request->getRequestUri();
             $slug = $product->getSlug();
+            $channel = $this->get('sylius.context.channel')->getChannel();
+            // 🔥 Filtrage des associations selon le canal
+            $filterService->filterAssociationsByChannel($product, $channel);
     
             // Redirige uniquement si l'URL ne contient pas déjà TABPERSO_CARREAU
             if (!str_contains($currentUrl, 'TABPERSO_CARREAU')) {
@@ -157,6 +185,8 @@ class ProductController extends ResourceController
         $variantTableau = $product->getVariants()
             ->filter(fn($v) => $v->getIsTableau())
             ->first();
+
+        $isPersoMug = $this->hasTaxonCode($product, 'PERSO_MUG');
     
         $currentTableauCode = $variantTableau instanceof ProductVariant ? $variantTableau->getCode() : null;
     
@@ -165,7 +195,8 @@ class ProductController extends ResourceController
             'metadata' => $this->metadata,
             'resource' => $product,
             'product' => $product,
-            'currentTableauCode' => $currentTableauCode
+            'currentTableauCode' => $currentTableauCode,
+            'isPersoMug' => $isPersoMug,
         ]);
     }
     

@@ -1,6 +1,9 @@
 <div class="column">
     <a href="{{ path('sylius_shop_homepage') }}">
-    Boutique de Marcel Séjour
-        <img src="{{ asset('build/shop/images/logo.png', 'shop') }}" alt="Sylius logo" class="ui small image" />
+        {% if use_webpack %}
+            <img src="{{ asset('build/shop/images/logo-latelier.png', 'shop') }}" alt="Sylius logo" class="ui small image" />
+        {% else %}
+            <img src="{{ asset('assets/shop/img/logo-latelier.png') }}" alt="Sylius logo" class="ui small image" />
+        {% endif %}
     </a>
 </div>

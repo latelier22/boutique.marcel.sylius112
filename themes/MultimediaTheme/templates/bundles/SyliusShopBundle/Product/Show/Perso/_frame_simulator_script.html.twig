@@ -1,0 +1,114 @@
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const editor = document.getElementById("frame-editor-container");
+    const simulateBtn = document.getElementById("simulateFrame");
+    const frame = document.getElementById("main-frame-wrapper");
+    const passepartout = document.getElementById("passe-partout-wrapper");
+    const frameWidth = document.getElementById("frameWidthSlider");
+    const frameWidthValue = document.getElementById("frameWidthValue");
+    const ppWidth = document.getElementById("ppWidthSlider");
+    const ppWidthValue = document.getElementById("ppWidthValue");
+    const frameColorPicker = document.getElementById("frameColorPicker");
+    const ppColorPicker = document.getElementById("ppColorPicker");
+    const frameRadios = document.querySelectorAll('input[name="frameColorRadio"]');
+    const ppRadios = document.querySelectorAll('input[name="passepartoutColorRadio"]');
+    const eyedropFrame = document.getElementById("activateFrameEyedropper");
+    const eyedropPP = document.getElementById("activatePPEyedropper");
+    const clearBtn = document.getElementById("clearFrame");
+    const saveBtn = document.getElementById("saveFrame");
+
+    if (simulateBtn) {
+        simulateBtn.addEventListener("click", () => {
+            editor.style.display = "block";
+            simulateBtn.style.display = "none";
+            frame.style.border = frameWidth.value + "px solid #000000";
+            frame.style.boxShadow = "10px 10px 20px rgba(0, 0, 0, 0.4)";
+            passepartout.style.backgroundColor = "#FFFFFF";
+            document.querySelector('input[value="#000000"][name="frameColorRadio"]').checked = true;
+            document.querySelector('input[value="#FFFFFF"][name="passepartoutColorRadio"]').checked = true;
+        });
+    }
+
+    frameRadios.forEach(radio => {
+        radio.addEventListener("change", () => {
+            frame.style.borderColor = radio.value;
+            frameColorPicker.value = radio.value;
+        });
+    });
+
+    ppRadios.forEach(radio => {
+        radio.addEventListener("change", () => {
+            passepartout.style.backgroundColor = radio.value;
+            ppColorPicker.value = radio.value;
+        });
+    });
+
+    frameColorPicker.addEventListener("input", e => {
+        frame.style.borderColor = e.target.value;
+    });
+
+    ppColorPicker.addEventListener("input", e => {
+        passepartout.style.backgroundColor = e.target.value;
+    });
+
+    if ('EyeDropper' in window) {
+        eyedropFrame.addEventListener("click", async () => {
+            const dropper = new EyeDropper();
+            try {
+                const result = await dropper.open();
+                frame.style.borderColor = result.sRGBHex;
+                frameColorPicker.value = result.sRGBHex;
+            } catch (e) {}
+        });
+
+        eyedropPP.addEventListener("click", async () => {
+            const dropper = new EyeDropper();
+            try {
+                const result = await dropper.open();
+                passepartout.style.backgroundColor = result.sRGBHex;
+                ppColorPicker.value = result.sRGBHex;
+            } catch (e) {}
+        });
+    }
+
+    frameWidth.addEventListener("input", () => {
+        frame.style.borderWidth = frameWidth.value + "px";
+        frameWidthValue.textContent = frameWidth.value;
+    });
+
+    ppWidth.addEventListener("input", () => {
+        passepartout.style.padding = ppWidth.value + "px";
+        ppWidthValue.textContent = ppWidth.value;
+    });
+
+    clearBtn.addEventListener("click", () => {
+        frame.style.border = "none";
+        frame.style.boxShadow = "none";
+        passepartout.style.backgroundColor = "transparent";
+        passepartout.style.padding = "0";
+        frameColorPicker.value = "#000000";
+        ppColorPicker.value = "#FFFFFF";
+        frameWidth.value = 15;
+        frameWidthValue.textContent = 15;
+        ppWidth.value = 0;
+        ppWidthValue.textContent = 0;
+        frameRadios.forEach(r => r.checked = false);
+        ppRadios.forEach(r => r.checked = false);
+        editor.style.display = "none";
+        simulateBtn.style.display = "block";
+    });
+
+    saveBtn.addEventListener("click", () => {
+        html2canvas(document.getElementById("main-frame-wrapper")).then(canvas => {
+            canvas.style.display = 'none';
+            document.body.appendChild(canvas);
+            const link = document.createElement('a');
+            link.download = 'cadre-personnalise.png';
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+            canvas.remove();
+        });
+    });
+});
+</script>

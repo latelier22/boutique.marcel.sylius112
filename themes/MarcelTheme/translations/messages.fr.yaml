@@ -23,6 +23,11 @@ sylius:
         contact: 'Contactez-nous'
         front: 'Les articles à la une'
         isTableau : 'Sélection de tableaux exposés en 2025'
+        no_featured_products: Aucun produit mis en avant
+        please_check_back_later: Revenez plus tard pour découvrir nos sélections !
+        featured_products:
+            title: 'Vos articles préférés!'
+            description: 'Une sélection des reproductions et produits dérivés les plus demandés en 2025'
 
     email:
         order_confirmation:

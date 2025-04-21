@@ -1,0 +1,16 @@
+<h1>{{ product.name }}</h1>
+
+<div class="ui two column grid">
+    <div class="column">
+        <h3>Produit</h3>
+        {# {% include '@SyliusShop/Product/Show/_mainImage.html.twig' with {'product': product} %} #}
+    </div>
+    <div class="column">
+        <h3>Tableau associé</h3>
+        {# {% if tableau.images|length > 0 %}
+            <img src="{{ asset(tableau.images.first.path) }}" alt="{{ tableau.name }}" class="ui large image">
+        {% else %}
+            <p>Aucune image pour le tableau.</p>
+        {% endif %} #}
+    </div>
+</div>

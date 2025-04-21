@@ -14,6 +14,8 @@ Encore
   .setPublicPath('/build/shop')
   .addEntry('theme', './themes/MarcelTheme/public/scss/main.scss')
   .addEntry('theme-perso', './themes/MarcelTheme/public/scss/perso.scss')
+  .addEntry('theme-latelier', './themes/MultimediaTheme/public/scss/main.scss')
+  .addEntry('theme-perso-latelier', './themes/MultimediaTheme/public/scss/perso.scss')
   .addEntry('shop-entry', './vendor/sylius/sylius/src/Sylius/Bundle/ShopBundle/Resources/private/entry.js')
   .addEntry('comment-entry','./assets/js/entry.js')
   .disableSingleRuntimeChunk()

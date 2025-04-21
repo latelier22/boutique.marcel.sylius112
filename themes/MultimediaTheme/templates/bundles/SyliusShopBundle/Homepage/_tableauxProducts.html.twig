@@ -1,0 +1,7 @@
+{% set products = tableau_products() %}
+
+
+<h2 class="ui center aligned huge header">{{ 'sylius.ui.isTableau'|trans }}</h2>
+<div class="ui hidden divider"></div>
+
+{% include '@SyliusShop/Homepage/_list.html.twig' %}

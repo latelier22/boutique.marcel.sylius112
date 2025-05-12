@@ -3,7 +3,7 @@
 {% set isOriginal = true %}
 
 {% set isCarreau = product.productTaxons|filter(pt => pt.taxon.code == 'PERSO_CARREAU')|length > 0 %}
-{% set isPerso = product.isPerso ?? false %}
+{# {% set isPerso = product.isPerso ?? false %} #}
 
 {% if product.imagesByType('main') is not empty %}
     {% set source_path = product.imagesByType('main').first.path %}

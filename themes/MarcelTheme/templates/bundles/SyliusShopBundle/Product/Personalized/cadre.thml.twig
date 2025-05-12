@@ -1,0 +1,19 @@
+
+    <div class="ui hidden divider"></div>
+    {% if isPersoCadre %}
+        <div class="ui two column stackable grid">
+            <div class="column" id="canvas-cadre">
+                    <div style="display: flex; flex-direction: column; gap: 2rem;">
+                    <cadre-canvas-component>Chargement de la scène...</cadre-canvas-component>
+                </div>
+            </div>
+            <div class="column" id="controls-cadre">
+                <div class="column" id="controls-cadre">
+                    <div style="display: flex; flex-direction: column; gap: 2rem;">
+                        <cadre-controls-component>Chargement des contrôles...</cadre-controls-component>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    </div>

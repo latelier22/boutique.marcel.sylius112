@@ -12,17 +12,14 @@ use Sylius\Component\Resource\ResourceActions;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Sylius\Component\Channel\Context\ChannelContextInterface;
-use Sylius\Component\Core\Model\ProductInterface;
 use App\Service\ProductAssociationFilterService;
-
 
 
 class ProductController extends ResourceController
 
 {
-   
-
-    function hasTaxonCode($product, string $expectedCode): bool {
+    function hasTaxonCode($product, string $expectedCode): bool
+    {
         foreach ($product->getProductTaxons() as $productTaxon) {
             $taxon = $productTaxon->getTaxon();
             while ($taxon !== null) {
@@ -34,12 +31,6 @@ class ProductController extends ResourceController
         }
         return false;
     }
-
-
-    
-    
-
-    
 
     public function personalizedShowAction(
         string $slug,
@@ -73,14 +64,6 @@ class ProductController extends ResourceController
             throw $this->createNotFoundException('Produit (slug) non trouvé.');
         }
 
-        // if (!$variant) {
-        //     throw $this->createNotFoundException('Produit (variant) non trouvé.');
-        // }
-
-        // foreach ($product->getProductTaxons() as $pt) {
-        //     dump($pt->getTaxon()->getCode());
-        // }
-        // dump($this->hasTaxonCode($product, 'PERSO_MUG'));
         $channel = $channelContext->getChannel();
         $filterService = $this->get(ProductAssociationFilterService::class);
         $filterService->filterAssociationsByChannel($product, $channel);
@@ -88,9 +71,9 @@ class ProductController extends ResourceController
 
         $productsAvecTableaux = $productRepository->findAllWithIsTableauVariant($channel);
 
-        
+
         // dd($productsAvecTableaux);
-       
+
         $taxonsTableaux = [];
 
         foreach ($productsAvecTableaux as $tableau) {
@@ -107,9 +90,9 @@ class ProductController extends ResourceController
 
         $currentTableauCode = $variant->getCode() ?? null;
 
-        
+
         // dd($taxonsTableaux);
-      
+
         return $this->render('@SyliusShop/Product/Personalized/show.html.twig', [
             'product' => $product,
             'variant' => $variant,
@@ -120,40 +103,41 @@ class ProductController extends ResourceController
             'metadata' => $this->metadata,
             'productSlug' => $slug,
             'isPersoMug' => $this->hasTaxonCode($product, 'PERSO_MUG'),
+            'isPersoCadre' => $this->hasTaxonCode($product, 'PERSO_CADRE'),
             'isCarreau' => $product->getProductTaxons()->exists(function ($key, $pt) {
                 return $pt->getTaxon() && $pt->getTaxon()->getCode() === 'PERSO_CARREAU';
             }),
-            'isPerso' => $product->isPerso(),
+            'isPerso' => $this->hasTaxonCode($product, 'PERSO'),
             'tableauxAvecTaxons' => $productsAvecTableaux,
             'taxonsTableaux' => array_values($taxonsTableaux),
             'currentTableauCode' => $currentTableauCode,
         ]);
-        
-        
     }
 
     public function showAction(Request $request): Response
-{
-    $configuration = $this->requestConfigurationFactory->create($this->metadata, $request);
-    $this->isGrantedOr403($configuration, ResourceActions::SHOW);
+    {
+        $configuration = $this->requestConfigurationFactory->create($this->metadata, $request);
+        $this->isGrantedOr403($configuration, ResourceActions::SHOW);
 
-    /** @var \App\Entity\Product\Product $product */
-    $product = $this->findOr404($configuration);
-    $this->eventDispatcher->dispatch(ResourceActions::SHOW, $configuration, $product);
+        /** @var \App\Entity\Product\Product $product */
+        $product = $this->findOr404($configuration);
+        $this->eventDispatcher->dispatch(ResourceActions::SHOW, $configuration, $product);
 
-    $channel = $this->get('sylius.context.channel')->getChannel();
-    $filterService = $this->get(ProductAssociationFilterService::class);
-    $filterService->filterAssociationsByChannel($product, $channel);
-    
+        $channel = $this->get('sylius.context.channel')->getChannel();
+        $filterService = $this->get(ProductAssociationFilterService::class);
+        $filterService->filterAssociationsByChannel($product, $channel);
+
+        $isPerso = $this->hasTaxonCode($product, 'PERSO');
+
         // ✅ Si c’est un produit perso et qu’on n’a pas de code de tableau dans l’URL → REDIRIGER
-        if ($product->isPerso()) {
+        if ($isPerso) {
             // Vérifie si le code est déjà présent dans l’URL
             $currentUrl = $request->getRequestUri();
             $slug = $product->getSlug();
             $channel = $this->get('sylius.context.channel')->getChannel();
             // 🔥 Filtrage des associations selon le canal
             $filterService->filterAssociationsByChannel($product, $channel);
-    
+
             // Redirige uniquement si l'URL ne contient pas déjà TABPERSO_CARREAU
             if (!str_contains($currentUrl, 'TABPERSO_CARREAU')) {
                 return $this->redirectToRoute('app_product_personalized', [
@@ -162,10 +146,10 @@ class ProductController extends ResourceController
                     '_locale' => $request->getLocale()
                 ]);
             }
-    
+
             // Sinon, comportement normal : afficher sans productAssocie
             $productsAvecTableaux = $this->get('sylius.repository.product')->findAllWithIsTableauVariant();
-    
+
             return $this->render('@SyliusShop/Product/Personalized/show.html.twig', [
                 'product' => $product,
                 'productAssocie' => null,
@@ -173,33 +157,41 @@ class ProductController extends ResourceController
                 'resource' => $product,
                 'configuration' => $configuration,
                 'metadata' => $this->metadata,
+                'isPerso' => $this->hasTaxonCode($product, 'PERSO'),
                 'isPersoMug' => $this->hasTaxonCode($product, 'PERSO_MUG'),
+                'isPersoCadre' => $this->hasTaxonCode($product, 'PERSO_CADRE'),
                 'isCarreau' => $product->getProductTaxons()->exists(function ($key, $pt) {
-        return $pt->getTaxon() && $pt->getTaxon()->getCode() === 'PERSO_CARREAU';
-    }),
-    'isPerso' => $product->isPerso(),
+                    return $pt->getTaxon() && $pt->getTaxon()->getCode() === 'PERSO_CARREAU';
+                }),
+                'isPerso' => $product->isPerso(),
             ]);
         }
-    
+
         // Produit classique
         $variantTableau = $product->getVariants()
             ->filter(fn($v) => $v->getIsTableau())
             ->first();
 
         $isPersoMug = $this->hasTaxonCode($product, 'PERSO_MUG');
-    
-        $currentTableauCode = $variantTableau instanceof ProductVariant ? $variantTableau->getCode() : null;
-    
-        return $this->render($configuration->getTemplate(ResourceActions::SHOW . '.html'), [
-            'configuration' => $configuration,
-            'metadata' => $this->metadata,
-            'resource' => $product,
-            'product' => $product,
-            'currentTableauCode' => $currentTableauCode,
-            'isPersoMug' => $isPersoMug,
-        ]);
-    }
-    
-    
 
+        $currentTableauCode = $variantTableau instanceof ProductVariant ? $variantTableau->getCode() : null;
+
+        $imageTextureUrl = null;
+
+        if ($product->getImages()->count() > 0) {
+            $image = $product->getImages()->first();
+            $imageTextureUrl = '/media/image/' . $image->getPath();
+        }
+
+        // dd($imageTextureUrl);
+
+    return $this->render($configuration->getTemplate(ResourceActions::SHOW . '.html'), [
+        'configuration' => $configuration,
+        'metadata' => $this->metadata,
+        'resource' => $product,
+        'product' => $product,
+        'currentTableauCode' => $currentTableauCode,
+        'imageTextureUrl' => $imageTextureUrl,
+    ]);
+}
 }

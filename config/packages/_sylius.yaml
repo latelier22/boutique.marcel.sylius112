@@ -84,6 +84,20 @@ liip_imagine:
         sylius_shop_product_scaled:
             filters:
                 thumbnail: { size: [400, 400], mode: outbound }
+        mug_22_9_cover_500:
+            filters:
+                thumbnail:
+                    size: [500, 205]         # 500px width, 22:9 ratio → height = 500 / (22/9) = ~205
+                    mode: outbound           # 'cover' effect — image cropped to fill the box
+                    allow_upscale: true      # to handle smaller images
+        mug_22_9_coverwhite_500:
+            quality: 90
+            filters:
+                thumbnail:
+                    size: [500, 205] # Format 22:9
+                    mode: inset # Ne rogne pas, conserve l’image entière
+                    allow_upscale: false
+                    background: '#ffffff' # Fond blanc (⚠️ pas 'white', il faut un code hex)
 
 sonata_block:
     default_contexts: ~

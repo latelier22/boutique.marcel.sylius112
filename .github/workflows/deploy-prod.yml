@@ -17,10 +17,12 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
-         
+          echo "Setting up SSH key..."
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-          ssh-keygen -p -m PEM -f ~/.ssh/id_rsa -P "" -N ""
+          # si ta clé est ed25519, adapte le nom :
+          # echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          ssh-keygen -p -m PEM -f ~/.ssh/id_rsa -P "" -N "" 2>/dev/null || true
           chmod 700 ~/.ssh
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H vps.latelier22.fr >> ~/.ssh/known_hosts

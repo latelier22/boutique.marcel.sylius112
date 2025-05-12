@@ -1,3 +1,7 @@
 import './Tests/Test.jsx'
 import './Tests/Perso.jsx'
 import './Tests/TestGallery.jsx'
+import './Tests/MiniMug.jsx'
+import './Tests/TestMiniMug.jsx'
+import './Tests/TestCadre.jsx'
+import './Tests/CadreApp.jsx'

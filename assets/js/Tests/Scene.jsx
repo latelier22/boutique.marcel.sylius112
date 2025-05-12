@@ -381,7 +381,7 @@ const Scene = () => {
         >
           <ambientLight intensity={0.5} />
           <directionalLight position={[10, 10, 10]} intensity={1.5} castShadow />
-          <Environment preset="warehouse" intensity={0.5} frames={2} />
+          {/* <Environment  intensity={0.5} frames={2} /> */}
           <MugPerso position={[0, 0, 0]} scale={100} texture={texture} color={mugColor} />
           <OrbitControls />
         </Canvas>

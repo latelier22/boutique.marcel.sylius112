@@ -15,7 +15,7 @@ export function Model3D({ isRotating, position = [0, -7, 0] }) {
     const { nodes, materials } = useGLTF("/models3d/MugModel.gltf");
 
     return (
-        <group  ref={cubeRef}  position={position} scale={[120, 120, 120]} dispose={null}>
+        <group  ref={cubeRef}  position={position} scale={[50, 50, 50]} dispose={null}>
             <group rotation={[0, -0.412, 0]}>
                 <mesh
                     castShadow

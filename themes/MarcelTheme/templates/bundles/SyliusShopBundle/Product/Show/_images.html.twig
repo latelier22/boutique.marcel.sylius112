@@ -3,7 +3,9 @@
 {% set isOriginal = true %}
 
 {% set isCarreau = product.productTaxons|filter(pt => pt.taxon.code == 'PERSO_CARREAU')|length > 0 %}
-{% set isPerso = product.isPerso ?? false %}
+{% set isCadre3d = product.productTaxons|filter(pt => pt.taxon.code == 'PERSO_CADRE')|length > 0 %}
+{% set isPerso = product.productTaxons|filter(pt => pt.taxon.code == 'PERSO')|length > 0 %}
+
 
 {% if product.imagesByType('main') is not empty %}
     {% set source_path = product.imagesByType('main').first.path %}
@@ -55,6 +57,17 @@
     {% endfor %}
 </div>
 {% endif %}
+
+{% if isCadre and product.code is defined %}
+    <a href="{{ path('app_product_personalized', {
+        'slug': 'affiche-imprimee-sur-papier-satin',
+        'code': product.code,
+        '_locale': app.request.locale
+    }) }}" class="ui primary button" style="margin-top: 1em; margin-x: auto; display: block;">
+        Configurer en 3D une impression sur papier, avec ou sans Passe-partout, encadrée ou non...
+    </a>
+{% endif %}
+
 
 
 {% if isCadre %}

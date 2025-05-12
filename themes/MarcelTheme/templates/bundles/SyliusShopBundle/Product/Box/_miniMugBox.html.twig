@@ -14,24 +14,27 @@
         }) %}
     {% endif %}
 
+    {# {{imageTextureUrl}} #}
+
     <a href="{{ productUrl }}" class="blurring dimmable image">
         <div class="ui dimmer">
             <div class="content">
                 <div class="center">
-                    <div class="ui inverted button">{{ 'sylius.ui.view_more'|trans }}</div>
+                    <div class="ui inverted button">{{ 'sylius.ui.view_3D'|trans }}</div>
                 </div>
             </div>
         </div>
-        {# {% include '@SyliusShop/Product/_mainImage.html.twig' with {'product': product} %} #}
-        {% if isPersoMug %}
-    <div class="mini-mug-container"
-         data-slug="{{ product.slug }}"
-         data-code="{{ currentTableauCode }}">
-         <!-- Le mini mug 3D sera monté ici en JS -->
-    </div>
-{% else %}
-    {% include '@SyliusShop/Product/_mainImage.html.twig' with {'product': product} %}
-{% endif %}
+     
+       <test-minimug 
+  slug="{{ product.slug }}" 
+  code="{{ currentTableauCode }}" 
+  imageTextureUrl="{{ imageTextureUrl }}"
+    color="bleu"
+  class="product-image-wrapper">
+  Chargement du MiniMug...
+</test-minimug>
+
+       
 
 
 

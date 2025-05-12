@@ -4,7 +4,8 @@
 {% block title %}{{ product.name }} | {{ parent() }}{% endblock %}
 
 {% block content %}
-    {% include '@SyliusShop/Product/Show/_breadcrumb.html.twig' %}
+
+    {# {% include '@SyliusShop/Product/Show/_breadcrumb.html.twig' %} #}
     <div class="ui hidden divider"></div>
 
     <div class="ui two column stackable grid">
@@ -16,7 +17,16 @@
     {% if isPersoMug %}
         <test-component name="Mug Pers: {{ isPersoMug }}">Chargement du composant test...</test-component>
     {% endif %}
-    
+    {# {% if isPersoCadre %}
+        <cadre-component name="Cadre Pers: {{ isPersoCadre }}">Chargement du composant Cadre...</cadre-component>
+    {% endif %} #}
+    {% if isPersoCadre %}
+    <div style="display: flex; flex-direction: column; gap: 2rem;">
+        <cadre-canvas-component>Chargement de la scène...</cadre-canvas-component>
+      
+    </div>
+{% endif %}
+
 
 
 
@@ -24,6 +34,13 @@
         </div>
 
         <div class="column" {{ sylius_test_html_attribute('product-box') }}>
+            {% if isPersoCadre %}
+    <div style="display: flex; flex-direction: column; gap: 2rem;">
+       
+        <cadre-controls-component>Chargement des contrôles...</cadre-controls-component>
+    </div>
+{% endif %}
+
             {{ sylius_template_event('sylius.shop.product.show.right_sidebar', _context) }}
 
             {% if productAssocie is defined and productAssocie is not null %}
@@ -93,8 +110,8 @@
     ,
    
 }|json_encode|e('html_attr') }}"></div> #}
-{# 
-<div id="react-gallery">
+
+{# <div id="react-gallery">
 <gallery-component
     title="Tableaux disponibles"
     tableaux="{{ tableauxAvecTaxons|json_encode|e('html_attr') }}"
@@ -109,7 +126,7 @@
     tableaux="{{ tableauxAvecTaxons|json_encode|e('html_attr') }}"
     >Chargement du composant testGallery..</test-gallery>
 
-    {% if productsAvecTableaux is not empty %}
+    {% if not isPersoCadre and productsAvecTableaux is not empty %}
         <div class="ui segment">
             <h3 class="ui header">🖼️ Tableaux disponibles</h3>
             <div class="ui small images">
@@ -135,6 +152,7 @@
             </div>
         </div>
     {% endif %}
+   
 
     {{ sylius_template_event('sylius.shop.product.show.content', _context) }}
 {% endblock %}

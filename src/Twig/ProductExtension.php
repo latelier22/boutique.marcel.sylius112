@@ -6,6 +6,7 @@ use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 use App\Repository\ProductRepositoryInterface;
 use Sylius\Component\Channel\Context\ChannelContextInterface;
+use Sylius\Component\Core\Model\ProductInterface;
 
 class ProductExtension extends AbstractExtension
 {
@@ -18,6 +19,7 @@ class ProductExtension extends AbstractExtension
     {
         return [
             new TwigFunction('products_by_taxon_slug', [$this, 'getProductsByTaxonSlug']),
+            new TwigFunction('hasExactTaxonCode', [$this, 'hasExactTaxonCode']),
         ];
     }
 
@@ -28,4 +30,19 @@ class ProductExtension extends AbstractExtension
         // Appelle le repo qui filtre déjà les produits par canal
         return $this->productRepository->findByTaxonSlug($slug, $locale, $channel);
     }
+
+    public function hasExactTaxonCode(ProductInterface $product, string $expectedCode): bool
+    {
+        foreach ($product->getProductTaxons() as $productTaxon) {
+            $taxon = $productTaxon->getTaxon();
+            if ($taxon && $taxon->getCode() === $expectedCode) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
+
+
+    

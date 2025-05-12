@@ -3,12 +3,7 @@
 {% block content %}
     <div class="homepage">
         <div class="ui hidden divider"></div>
-<div class="column">
-    <a href="{{ path('sylius_shop_homepage') }}">
-    LOGO
-        <img src="{{ asset('build/app/shop/images/logo-latelier.png', 'shop') }}" alt="Sylius logo" class="ui small image" />
-    </a>
-</div>
+
         {{ sylius_template_event('sylius.shop.homepage') }}
     </div>
 {% endblock %}

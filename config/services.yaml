@@ -51,6 +51,11 @@ services:
         public: true
 
 
+    App\Twig\ProductExtension:
+        tags: ['twig.extension']
+        public: true
+   
+
 
 imports:
     - { resource: "../themes/MarcelTheme/config/sylius_ui.yaml" }

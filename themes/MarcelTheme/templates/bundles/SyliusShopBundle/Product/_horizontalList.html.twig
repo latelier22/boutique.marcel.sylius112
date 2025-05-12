@@ -16,8 +16,10 @@
 
 <div class="ui four doubling cards">
   {% for product in products %}
-    {% if product.isPerso and utils.hasTaxonCode(product, 'PERSO_MUG') %}
-       {% include '@SyliusShop/Product/Box/_content.html.twig' with {
+  {% if hasExactTaxonCode(product, 'PERSO_MUG') %}
+
+
+       {% include '@SyliusShop/Product/Box/_miniMugBox.html.twig' with {
             'product': product,
             'currentTableauCode': currentTableauCode
         } %}

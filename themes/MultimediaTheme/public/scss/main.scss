@@ -1,6 +1,6 @@
 // // Variables personnalisées (si nécessaires)
 $rouge: #1b36a1;
-$fond: #f8f9b8;
+$fond: #ffffff;
 
 // // Classes personnalisées ou pour écraser les styles existants
 // body {
@@ -40,6 +40,7 @@ body {
 .ui,
 .ui.header {
     font-family: 'Inter', sans-serif !important;
+    color: rgb(12, 12, 96);
 }
 
 a:hover {

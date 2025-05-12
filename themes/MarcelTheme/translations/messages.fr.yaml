@@ -28,6 +28,7 @@ sylius:
         featured_products:
             title: 'Vos articles préférés!'
             description: 'Une sélection des reproductions et produits dérivés les plus demandés en 2025'
+        view_3D: 'Visualiser en 3D'
 
     email:
         order_confirmation:

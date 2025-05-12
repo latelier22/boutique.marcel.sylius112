@@ -46,6 +46,7 @@ jobs:
         run: |
           ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr "
             cd /var/www/boutique.marcel &&
+            cp .env.prod .env &&
             export APP_ENV=prod &&
             composer install --no-dev --optimize-autoloader
           "

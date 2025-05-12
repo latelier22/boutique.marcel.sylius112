@@ -43,6 +43,7 @@ sylius_grid:
             fields:
                 ean:
                     enabled: false
+                    type: string
 
 
 sylius_shop:    

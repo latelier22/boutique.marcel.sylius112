@@ -32,45 +32,37 @@ jobs:
           ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr \
             "sudo rm -rf /var/www/boutique.marcel/public/build"
 
-      - name: Copy files to VPS (excluding vendor/ and node_modules/)
+      - name: Copy files to VPS (no more sudo!)
         run: |
           rsync -avz --delete \
             --exclude 'vendor/' \
             --exclude 'node_modules/' \
-            -e "ssh -i ~/.ssh/id_rsa \
-                -o IdentitiesOnly=yes \
-                -o StrictHostKeyChecking=no" \
-            --rsync-path="sudo rsync" \
-            ./ debian@vps.latelier22.fr:/var/www/boutique.marcel/
+            -e "ssh -i ~/.ssh/id_rsa -o IdentitiesOnly=yes" \
+            ./ \
+            debian@vps.latelier22.fr:/var/www/boutique.marcel/
 
-      - name: Prepare directories & permissions on VPS
+      - name: Prepare .env, cache & media (as debian)
         run: |
           ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr << 'EOF'
             set -e
-            # 1) Créer var/cache, var/log
-            sudo mkdir -p /var/www/boutique.marcel/var/cache/prod
-            sudo mkdir -p /var/www/boutique.marcel/var/log
+            cd /var/www/boutique.marcel
 
-            # 2) Copier .env.prod -> .env
-            cp /var/www/boutique.marcel/.env.prod /var/www/boutique.marcel/.env
+            # 1) Copier .env
+            cp .env.prod .env
 
-            # 3) Permissions sur var
-            sudo chown -R debian:www-data /var/www/boutique.marcel/var
-            sudo chmod -R 775           /var/www/boutique.marcel/var
+            # 2) Créer cache + logs si manquant
+            mkdir -p var/cache/prod var/log
 
-            # 4) (Re)créer le symlink public/media
-            sudo rm -rf /var/www/boutique.marcel/public/media
-            sudo mkdir -p /var/www/boutique.marcel/public
-            sudo ln -s /home/debian/boutique.marcel/public/media \
-                     /var/www/boutique.marcel/public/media
+            # 3) Re-créer le lien media
+            rm -rf public/media
+            ln -s /home/debian/boutique.marcel/public/media public/media
 
-            # 5) Permissions sur media
-            sudo mkdir -p /home/debian/boutique.marcel/public/media
-            sudo chown -R debian:www-data /home/debian/boutique.marcel/public/media
-            sudo chmod -R 775           /home/debian/boutique.marcel/public/media
+            # 4) Permissions (déjà bonnes, mais on s’assure)
+            chmod -R 775 var cache public/media
+            chmod -R 664 .env
           EOF
 
-      - name: Install PHP dependencies (no dev) & clear cache
+      - name: Install PHP deps & clear cache
         run: |
           ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr << 'EOF'
             set -e
@@ -80,6 +72,7 @@ jobs:
             php bin/console cache:clear --env=prod --no-warmup
             php bin/console cache:warmup  --env=prod
           EOF
+
 
       - name: Install Node dependencies & build assets
         run: |

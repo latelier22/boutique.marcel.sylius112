@@ -59,12 +59,14 @@ jobs:
             echo "OPENAI_KEY=${{ secrets.OPENAI_KEY }}" >> .env
 
             mkdir -p var/cache/prod var/log
+            touch var/log/prod.log
 
             rm -rf public/media
             ln -s /home/debian/boutique.marcel/public/media public/media
 
             chmod -R 775 var public/media
-            chmod 664 .env
+            chmod 664 .env var/log/prod.log
+            sudo chown -R debian:debian var || true
           EOF
 
       - name: Install PHP deps & clear cache

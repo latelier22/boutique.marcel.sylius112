@@ -57,10 +57,14 @@ jobs:
             rm -rf public/media
             ln -s /home/debian/boutique.marcel/public/media public/media
 
-            # 4) Permissions (déjà bonnes, mais on s’assure)
-            chmod -R 775 var cache public/media
-            chmod -R 664 .env
+            # 4) Permissions
+            #    - 775 sur tout var (cache+log)
+            #    - 775 sur public/media
+            #    - 664 sur .env
+            chmod -R 775 var public/media
+            chmod 664 .env
           EOF
+
 
       - name: Install PHP deps & clear cache
         run: |

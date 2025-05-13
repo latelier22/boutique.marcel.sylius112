@@ -79,6 +79,12 @@ jobs:
             chmod 777 -R var/cache/prod
           EOF
 
+      - name: Fix node_modules ownership before PNPM
+        run: |
+          ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr << 'EOF'
+            sudo chown -R debian:debian /var/www/boutique.marcel/node_modules || true
+          EOF
+
       - name: Install Node dependencies & build assets
         run: |
           ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr << 'EOF'

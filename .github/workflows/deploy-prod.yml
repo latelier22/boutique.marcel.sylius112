@@ -41,39 +41,31 @@ jobs:
             ./ \
             debian@vps.latelier22.fr:/var/www/boutique.marcel/
 
-      - name: Prepare .env, cache & media (as debian)
+      - name: Prepare .env, cache, media and inject secrets
         run: |
-          ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr << 'EOF'
+          ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr << EOF
             set -e
             cd /var/www/boutique.marcel
 
-            # 1) Copier .env
+            # Copier .env.prod puis injecter les secrets
             cp .env.prod .env
 
-            # 1) Créer .env avec les secrets GitHub injectés
-            cat > .env <<EOL
-            APP_ENV=prod
-            DATABASE_URL="${{ secrets.DATABASE_URL }}"
-            MAILER_DSN="${{ secrets.MAILER_DSN }}"
-            OPENAI_KEY="${{ secrets.OPENAI_KEY }}"
-            EOL
+            sed -i '/^DATABASE_URL=/d' .env
+            sed -i '/^MAILER_DSN=/d' .env
+            sed -i '/^OPENAI_KEY=/d' .env
 
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+            echo "MAILER_DSN=${{ secrets.MAILER_DSN }}" >> .env
+            echo "OPENAI_KEY=${{ secrets.OPENAI_KEY }}" >> .env
 
-            # 2) Créer cache + logs si manquant
             mkdir -p var/cache/prod var/log
 
-            # 3) Re-créer le lien media
             rm -rf public/media
             ln -s /home/debian/boutique.marcel/public/media public/media
 
-            # 4) Permissions
-            #    - 775 sur tout var (cache+log)
-            #    - 775 sur public/media
-            #    - 664 sur .env
             chmod -R 775 var public/media
             chmod 664 .env
           EOF
-
 
       - name: Install PHP deps & clear cache
         run: |
@@ -87,14 +79,13 @@ jobs:
             chmod 777 -R var/cache/prod
           EOF
 
-
       - name: Install Node dependencies & build assets
         run: |
           ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr << 'EOF'
             set -e
             cd /var/www/boutique.marcel
-            sudo pnpm install
-            sudo pnpm run build
+            pnpm install
+            pnpm run build
           EOF
 
       - name: Restart services

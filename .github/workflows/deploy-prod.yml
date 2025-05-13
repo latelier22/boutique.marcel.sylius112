@@ -8,111 +8,92 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up SSH key for secure connection
+      - name: Set up SSH key
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
-          echo "Setting up SSH key..."
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-          # si ta clé est ed25519, adapte le nom :
-          # echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
           ssh-keygen -p -m PEM -f ~/.ssh/id_rsa -P "" -N "" 2>/dev/null || true
-          chmod 700 ~/.ssh
-          chmod 600 ~/.ssh/id_rsa
+          chmod 700 ~/.ssh && chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H vps.latelier22.fr >> ~/.ssh/known_hosts
 
       - name: Clear Symfony cache before rsync
         run: |
-          ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr "
-            sudo rm -rf /var/www/boutique.marcel/var/cache/*
-          "
+          ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr \
+            "sudo rm -rf /var/www/boutique.marcel/var/cache/*"
+
       - name: Clean public/build on VPS
         run: |
-          ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr "
-            sudo rm -rf /var/www/boutique.marcel/public/build
-          "
+          ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr \
+            "sudo rm -rf /var/www/boutique.marcel/public/build"
 
-      - name: Copy files to VPS (excluding vendor/, node_modules/, media/)
+      - name: Copy files to VPS (excluding vendor/ and node_modules/)
         run: |
-          sudo rsync -avz --exclude 'vendor/' --exclude 'node_modules/' --delete ./ \
-            debian@vps.latelier22.fr:/var/www/boutique.marcel/
+          rsync -avz --delete \
+            --exclude 'vendor/' \
+            --exclude 'node_modules/' \
+            -e "ssh -i ~/.ssh/id_rsa \
+                -o IdentitiesOnly=yes \
+                -o StrictHostKeyChecking=no" \
+            --rsync-path="sudo rsync" \
+            ./ debian@vps.latelier22.fr:/var/www/boutique.marcel/
 
-      - name: Restore media symlink & set permissions
+      - name: Prepare directories & permissions on VPS
         run: |
           ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr << 'EOF'
             set -e
-            sudo mkdir -p /var/www/boutique.marcel/public
+            # 1) Créer var/cache, var/log
+            sudo mkdir -p /var/www/boutique.marcel/var/cache/prod
+            sudo mkdir -p /var/www/boutique.marcel/var/log
+
+            # 2) Copier .env.prod -> .env
+            cp /var/www/boutique.marcel/.env.prod /var/www/boutique.marcel/.env
+
+            # 3) Permissions sur var
+            sudo chown -R debian:www-data /var/www/boutique.marcel/var
+            sudo chmod -R 775           /var/www/boutique.marcel/var
+
+            # 4) (Re)créer le symlink public/media
             sudo rm -rf /var/www/boutique.marcel/public/media
+            sudo mkdir -p /var/www/boutique.marcel/public
             sudo ln -s /home/debian/boutique.marcel/public/media \
                      /var/www/boutique.marcel/public/media
+
+            # 5) Permissions sur media
+            sudo mkdir -p /home/debian/boutique.marcel/public/media
             sudo chown -R debian:www-data /home/debian/boutique.marcel/public/media
             sudo chmod -R 775           /home/debian/boutique.marcel/public/media
           EOF
 
-      - name: Ensure var directories exist & set permissions
-        run: |
-          ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr << 'EOF'
-            set -e
-            sudo mkdir -p /var/www/boutique.marcel/var/cache/prod
-            sudo mkdir -p /var/www/boutique.marcel/var/log
-            sudo chown -R debian:www-data /var/www/boutique.marcel/var
-            sudo chmod -R 775           /var/www/boutique.marcel/var
-          EOF
-
-      - name: Install PHP dependencies (no dev)
+      - name: Install PHP dependencies (no dev) & clear cache
         run: |
           ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr << 'EOF'
             set -e
             cd /var/www/boutique.marcel
-            cp .env.prod .env
             export APP_ENV=prod
             composer install --no-dev --optimize-autoloader --no-interaction
+            php bin/console cache:clear --env=prod --no-warmup
+            php bin/console cache:warmup  --env=prod
           EOF
 
-      - name: Install Node dependencies and build assets
+      - name: Install Node dependencies & build assets
         run: |
-          ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr "
-            cd /var/www/boutique.marcel &&
-            sudo pnpm i &&
+          ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr << 'EOF'
+            set -e
+            cd /var/www/boutique.marcel
+            sudo pnpm install
             sudo pnpm run build
-          "
-
-      - name: Replace .env with .env.prod
-        run: |
-          ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr "
-            cd /var/www/boutique.marcel &&
-            cp .env.prod .env
-          "
-
-      - name: Set correct permissions
-        run: |
-          ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr "
-            sudo chown -R debian:debian /var/www/boutique.marcel &&
-            sudo chown -R www-data:www-data /var/www/boutique.marcel/var &&
-            sudo chown -R www-data:www-data /var/www/boutique.marcel/public/media &&
-            sudo chmod -R 775 /var/www/boutique.marcel/var &&
-            sudo chmod -R 775 /var/www/boutique.marcel/public/media
-          "
-
-      - name: Clear cache
-        run: |
-          ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr "
-            cd /var/www/boutique.marcel &&
-            php bin/console cache:clear --env=prod &&
-            sudo chown -R www-data:www-data /var/www/boutique.marcel/var &&
-            sudo chmod -R 775 /var/www/boutique.marcel/var
-          "
+          EOF
 
       - name: Restart services
         run: |
-          ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr "sudo systemctl restart php8.2-fpm"
-          ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr "sudo systemctl restart nginx"
+          ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr \
+            "sudo systemctl restart php8.2-fpm nginx"
 
-      - name: ✅ Done
-        run: echo "🎉 Deployment complete!"
+      - name: ✅ Deployment complete
+        run: echo "🎉 Done!"

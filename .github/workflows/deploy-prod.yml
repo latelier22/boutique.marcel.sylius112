@@ -95,10 +95,6 @@ jobs:
             cd /var/www/boutique.marcel
             sudo pnpm install
             sudo pnpm run build
-            env:
-              DATABASE_URL: ${{ secrets.DATABASE_URL }}
-              MAILER_DSN: ${{ secrets.MAILER_DSN }}
-              OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
           EOF
 
       - name: Restart services

@@ -25,12 +25,9 @@ jobs:
       - name: Clear Symfony cache before rsync
         run: |
           ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr \
-            "sudo rm -rf /var/www/boutique.marcel/var/cache/*"
+            "sudo rm -rf /var/www/boutique.marcel/*"
 
-      - name: Clean public/build on VPS
-        run: |
-          ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr \
-            "sudo rm -rf /var/www/boutique.marcel/public/build"
+      
 
       - name: Copy files to VPS (no more sudo!)
         run: |

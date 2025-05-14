@@ -59,13 +59,14 @@ jobs:
             echo "OPENAI_KEY=${{ secrets.OPENAI_KEY }}" >> .env
 
             mkdir -p var/cache/prod var/log
-            touch var/log/prod.log
+            #touch var/log/prod.log
 
             rm -rf public/media
             ln -s /home/debian/boutique.marcel/public/media public/media
 
             chmod -R 775 var public/media
-            chmod 664 .env var/log/prod.log
+            chmod 664 .env 
+            #var/log/prod.log
             sudo chown -R debian:debian var || true
           EOF
 
@@ -75,6 +76,7 @@ jobs:
             set -e
             cd /var/www/boutique.marcel
             export APP_ENV=prod
+            export APP_DEBUG=1
             composer install --no-dev --optimize-autoloader --no-interaction
             php bin/console cache:clear --env=prod --no-warmup
             php bin/console cache:warmup  --env=prod

@@ -8,97 +8,287 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up SSH key
+      - name: Set up SSH key for secure connection
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-          ssh-keygen -p -m PEM -f ~/.ssh/id_rsa -P "" -N "" 2>/dev/null || true
-          chmod 700 ~/.ssh && chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H vps.latelier22.fr >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_rsa
 
-      - name: Clear Symfony cache before rsync
+      # ─────────────────────────────────────────────────────────────────────────────
+      # 1) Wipe and recreate cache & log dirs on the server (with SSH opts)
+      # ─────────────────────────────────────────────────────────────────────────────
+      - name: Prepare var/cache & var/log on VPS
         run: |
-          ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr \
-            "sudo rm -rf /var/www/boutique.marcel/*"
+          ssh -o StrictHostKeyChecking=no \
+              -o UserKnownHostsFile=/dev/null \
+              -i ~/.ssh/id_rsa \
+              debian@vps.latelier22.fr << 'EOF'
+            sudo rm -rf /var/www/boutique.multimedia/var/cache \
+                         /var/www/boutique.multimedia/var/log
+            sudo mkdir -p /var/www/boutique.multimedia/var/{cache,log}
+            sudo chown -R www-data:www-data /var/www/boutique.multimedia/var
+            sudo chmod -R 775 /var/www/boutique.multimedia/var
+          EOF
+
+      # ─────────────────────────────────────────────────────────────────────────────
+      # 2) Remove old built assets
+      # ─────────────────────────────────────────────────────────────────────────────
+      - name: Clean public/build on VPS
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+              -o UserKnownHostsFile=/dev/null \
+              -i ~/.ssh/id_rsa \
+              debian@vps.latelier22.fr \
+              "sudo rm -rf /var/www/boutique.multimedia/public/build"
+
+      # ─────────────────────────────────────────────────────────────────────────────
+      # 3) Rsync code (exclut var/, vendor/, node_modules/, public/media/)
+      # ─────────────────────────────────────────────────────────────────────────────
+      - name: Sync application code
+        run: |
+          rsync -az \
+            -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/id_rsa" \
+            --rsync-path="sudo rsync" \
+            --exclude='vendor/' \
+            --exclude='node_modules/' \
+            --exclude='public/media/' \
+            --exclude='var/' \
+            --delete \
+            ./ debian@vps.latelier22.fr:/var/www/boutique.multimedia
+
+      # ─────────────────────────────────────────────────────────────────────────────
+      # 4) Install PHP deps as root (pour que cache:clear fonctionne)
+      # ─────────────────────────────────────────────────────────────────────────────
+      - name: Install PHP dependencies
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+              -o UserKnownHostsFile=/dev/null \
+              -i ~/.ssh/id_rsa \
+              debian@vps.latelier22.fr << 'EOF'
+            cd /var/www/boutique.multimedia
+            sudo composer install --no-dev --optimize-autoloader
+            sudo chown -R www-data:www-data var
+            sudo chmod -R 775 var
+          EOF
+
+      # ─────────────────────────────────────────────────────────────────────────────
+      # 5) Build front-end assets
+      # ─────────────────────────────────────────────────────────────────────────────
+      - name: Install Node deps & build assets
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+              -o UserKnownHostsFile=/dev/null \
+              -i ~/.ssh/id_rsa \
+              debian@vps.latelier22.fr << 'EOF'
+            cd /var/www/boutique.multimedia
+            sudo pnpm install
+            sudo pnpm run build
+          EOF
+
+      # ─────────────────────────────────────────────────────────────────────────────
+      # 6) (Re)create prod.log + install Symfony assets
+      # ─────────────────────────────────────────────────────────────────────────────
+      - name: Install Symfony assets on VPS
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+              -o UserKnownHostsFile=/dev/null \
+              -i ~/.ssh/id_rsa \
+              debian@vps.latelier22.fr << 'EOF'
+            cd /var/www/boutique.multimedia
+
+            # 6.a) (Re)créer var/log/prod.log avec les bons droits
+            sudo mkdir -p var/log
+            sudo touch var/log/prod.log
+            sudo chown www-data:www-data var/log/prod.log
+            sudo chmod 664 var/log/prod.log
+            # 1) S’assurer que public/ est owned by www-data et writable
+            sudo chown -R www-data:www-data public
+            sudo chmod -R 775 public
+
+            # 2) Installer les assets (en symlink) via l’utilisateur www-data
+            sudo -u www-data php bin/console assets:install public --symlink --env=prod
+          EOF
+
+
+      # ─────────────────────────────────────────────────────────────────────────────
+      # 7) Swap in prod .env and fix media permissions
+      # ─────────────────────────────────────────────────────────────────────────────
+      - name: Env file & media perms
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+              -o UserKnownHostsFile=/dev/null \
+              -i ~/.ssh/id_rsa \
+              debian@vps.latelier22.fr <<EOF
+            cd /var/www/boutique.multimedia
+
+            cp .env.prod .env
+
+            # remove any old keys just in case
+            sed -i '/^GOOGLE_CSE_ID=/d' .env
+            sed -i '/^GOOGLE_API_KEY=/d' .env
+
+            # now append with guaranteed newlines
+            printf "\nGOOGLE_CSE_ID=%s\n" "${{ secrets.GOOGLE_CSE_ID }}" >> .env
+            printf "GOOGLE_API_KEY=%s\n"     "${{ secrets.GOOGLE_API_KEY }}" >> .env
+
+            # verify (this will show up in your logs, values masked)
+            echo "---- final .env ----"
+            tail -n 3 .env
+
+            # fix media perms
+            sudo chown -R www-data:www-data public/media
+            sudo chmod -R 775 public/media
+          EOF
+
+      # ─────────────────────────────────────────────────────────────────────────────
+      # DEBUG: Show that GitHub secrets actually exist in the runner
+      # ─────────────────────────────────────────────────────────────────────────────
+      - name: Debug GitHub Actions secrets on runner
+        run: |
+          echo "Runner sees these secrets (they’ll be masked in logs):"
+          echo "GOOGLE_CSE_ID = ${{ secrets.GOOGLE_CSE_ID }}"
+          echo "GOOGLE_API_KEY  = ${{ secrets.GOOGLE_API_KEY }}"
+
+          # Also print their lengths to prove they’re non-empty
+          echo -n "Length of GOOGLE_CSE_ID: " && echo -n "${{ secrets.GOOGLE_CSE_ID }}" | wc -c
+          echo -n "Length of GOOGLE_API_KEY:  " && echo -n "${{ secrets.GOOGLE_API_KEY }}" | wc -c
+
+      # ─────────────────────────────────────────────────────────────────────────────
+      # DEBUG: Show the .env file _after_ you’ve appended the secrets on the server
+      # ─────────────────────────────────────────────────────────────────────────────
+      - name: Debug remote .env contents
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+              -o UserKnownHostsFile=/dev/null \
+              -i ~/.ssh/id_rsa \
+              debian@vps.latelier22.fr << 'EOF'
+            echo "===== REMOTE .env ====="
+            cat /var/www/boutique.multimedia/.env
+            echo "===== DONE ====="
+          EOF
+
+      # ─────────────────────────────────────────────────────────────────────────────
+      # 8) Restart PHP-FPM & Nginx
+      # ─────────────────────────────────────────────────────────────────────────────
+      - name: Restart services
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+              -o UserKnownHostsFile=/dev/null \
+              -i ~/.ssh/id_rsa \
+              debian@vps.latelier22.fr \
+              "sudo systemctl restart php8.2-fpm && sudo systemctl restart nginx"
+
+      - name: ✅ Deployment complete
+        run: echo "🎉 Deployed to prod!"
+
+# name: Deploy Sylius to VPS
+
+# on:
+#   push:
+#     branches:
+#       - prod
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
+
+#       - name: Set up SSH key
+#         env:
+#           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+#         run: |
+#           mkdir -p ~/.ssh
+#           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+#           ssh-keygen -p -m PEM -f ~/.ssh/id_rsa -P "" -N "" 2>/dev/null || true
+#           chmod 700 ~/.ssh && chmod 600 ~/.ssh/id_rsa
+#           ssh-keyscan -H vps.latelier22.fr >> ~/.ssh/known_hosts
+
+#       - name: Clear Symfony cache before rsync
+#         run: |
+#           ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr \
+#             "sudo rm -rf /var/www/boutique.marcel/*"
 
       
 
-      - name: Copy files to VPS (no more sudo!)
-        run: |
-          rsync -avz --delete \
-            --exclude 'vendor/' \
-            --exclude 'node_modules/' \
-            -e "ssh -i ~/.ssh/id_rsa -o IdentitiesOnly=yes" \
-            ./ \
-            debian@vps.latelier22.fr:/var/www/boutique.marcel/
+#       - name: Copy files to VPS (no more sudo!)
+#         run: |
+#           rsync -avz --delete \
+#             --exclude 'vendor/' \
+#             --exclude 'node_modules/' \
+#             -e "ssh -i ~/.ssh/id_rsa -o IdentitiesOnly=yes" \
+#             ./ \
+#             debian@vps.latelier22.fr:/var/www/boutique.marcel/
 
-      - name: Prepare .env, cache, media and inject secrets
-        run: |
-          ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr << EOF
-            set -e
-            cd /var/www/boutique.marcel
+#       - name: Prepare .env, cache, media and inject secrets
+#         run: |
+#           ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr << EOF
+#             set -e
+#             cd /var/www/boutique.marcel
 
-            # Copier .env.prod puis injecter les secrets
-            cp .env.prod .env
+#             # Copier .env.prod puis injecter les secrets
+#             cp .env.prod .env
 
-            sed -i '/^DATABASE_URL=/d' .env
-            sed -i '/^MAILER_DSN=/d' .env
-            sed -i '/^OPENAI_KEY=/d' .env
+#             sed -i '/^DATABASE_URL=/d' .env
+#             sed -i '/^MAILER_DSN=/d' .env
+#             sed -i '/^OPENAI_KEY=/d' .env
 
-            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
-            echo "MAILER_DSN=${{ secrets.MAILER_DSN }}" >> .env
-            echo "OPENAI_KEY=${{ secrets.OPENAI_KEY }}" >> .env
+#             echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+#             echo "MAILER_DSN=${{ secrets.MAILER_DSN }}" >> .env
+#             echo "OPENAI_KEY=${{ secrets.OPENAI_KEY }}" >> .env
 
-            mkdir -p var/cache/prod var/log
-            #touch var/log/prod.log
+#             mkdir -p var/cache/prod var/log
+#             #touch var/log/prod.log
 
-            rm -rf public/media
-            ln -s /home/debian/boutique.marcel/public/media public/media
+#             rm -rf public/media
+#             ln -s /home/debian/boutique.marcel/public/media public/media
 
-            chmod -R 775 var public/media
-            chmod 664 .env 
-            #var/log/prod.log
-            sudo chown -R debian:debian var || true
-          EOF
+#             chmod -R 775 var public/media
+#             chmod 664 .env 
+#             #var/log/prod.log
+#             sudo chown -R debian:debian var || true
+#           EOF
 
-      - name: Install PHP deps & clear cache
-        run: |
-          ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr << 'EOF'
-            set -e
-            cd /var/www/boutique.marcel
-            export APP_ENV=prod
-            export APP_DEBUG=1
-            composer install --no-dev --optimize-autoloader --no-interaction
-            php bin/console cache:clear --env=prod --no-warmup
-            php bin/console cache:warmup  --env=prod
-            chmod 777 -R var/cache/prod
-          EOF
+#       - name: Install PHP deps & clear cache
+#         run: |
+#           ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr << 'EOF'
+#             set -e
+#             cd /var/www/boutique.marcel
+#             export APP_ENV=prod
+#             export APP_DEBUG=1
+#             composer install --no-dev --optimize-autoloader --no-interaction
+#             php bin/console cache:clear --env=prod --no-warmup
+#             php bin/console cache:warmup  --env=prod
+#             chmod 777 -R var/cache/prod
+#           EOF
 
-      - name: Fix node_modules ownership before PNPM
-        run: |
-          ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr << 'EOF'
-            sudo chown -R debian:debian /var/www/boutique.marcel/node_modules || true
-          EOF
+#       - name: Fix node_modules ownership before PNPM
+#         run: |
+#           ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr << 'EOF'
+#             sudo chown -R debian:debian /var/www/boutique.marcel/node_modules || true
+#           EOF
 
-      - name: Install Node dependencies & build assets
-        run: |
-          ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr << 'EOF'
-            set -e
-            cd /var/www/boutique.marcel
-            pnpm install
-            pnpm run build
-          EOF
+#       - name: Install Node dependencies & build assets
+#         run: |
+#           ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr << 'EOF'
+#             set -e
+#             cd /var/www/boutique.marcel
+#             pnpm install
+#             pnpm run build
+#           EOF
 
-      - name: Restart services
-        run: |
-          ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr \
-            "sudo systemctl restart php8.2-fpm nginx"
+#       - name: Restart services
+#         run: |
+#           ssh -i ~/.ssh/id_rsa debian@vps.latelier22.fr \
+#             "sudo systemctl restart php8.2-fpm nginx"
 
-      - name: ✅ Deployment complete
-        run: echo "🎉 Done!"
+#       - name: ✅ Deployment complete
+#         run: echo "🎉 Done!"
